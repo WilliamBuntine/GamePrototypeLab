@@ -3699,7 +3699,7 @@ GameObject:
   - component: {fileID: 1425695105}
   - component: {fileID: 1425695104}
   m_Layer: 0
-  m_Name: Cube
+  m_Name: Floor
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5195,8 +5195,8 @@ GameObject:
   - component: {fileID: 2143771601}
   - component: {fileID: 2143771600}
   m_Layer: 0
-  m_Name: Cube (1)
-  m_TagString: Untagged
+  m_Name: Tower
+  m_TagString: Tower
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -5362,6 +5362,14 @@ PrefabInstance:
       propertyPath: enableZoom
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4459864850019384740, guid: 6bacecc4f3df9584198879c73a6b6c36, type: 3}
+      propertyPath: maxDistance
+      value: 66.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4459864850019384740, guid: 6bacecc4f3df9584198879c73a6b6c36, type: 3}
+      propertyPath: GrapplePoint
+      value: 
+      objectReference: {fileID: 641451238332255576, guid: ffc233befeb554b7bb353eb7e4e1f603, type: 3}
     - target: {fileID: 4459864850019384740, guid: 6bacecc4f3df9584198879c73a6b6c36, type: 3}
       propertyPath: enableCrouch
       value: 0

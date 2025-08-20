@@ -18,8 +18,11 @@ public class FirstPersonController : MonoBehaviour
 {
     private Rigidbody rb;
 
+    public GameObject GrapplePoint;
     #region Camera Movement Variables
-
+    private float offSurfaceOffset = 0.01f;
+    Camera cam;
+    RaycastHit hit;
     public Camera playerCamera;
 
     public float fov = 60f;
@@ -221,12 +224,19 @@ public class FirstPersonController : MonoBehaviour
                 new Vector3(Screen.width / 2f, Screen.height / 2f, 0f)
             );
 
-            RaycastHit hit;
             if (Physics.Raycast(ray, out hit, maxDistance))
             {
                 Debug.Log("Hit " + hit.collider.name + " at " + hit.point);
-                
-                // Example: apply force if it has a rigidbody
+
+                // Spawn at surface point, lifted slightly along the normal
+                Vector3 pos = hit.point + hit.normal * offSurfaceOffset;
+
+                // Orientation doesn't matter → use identity
+                var obj = Instantiate(GrapplePoint, pos, Quaternion.identity);
+
+                // Optional: stick to moving targets
+                // obj.transform.SetParent(hit.transform);
+
                 Rigidbody rb = hit.collider.attachedRigidbody;
                 if (rb != null)
                 {
@@ -598,6 +608,8 @@ public class FirstPersonController : MonoBehaviour
         fpc.playerCamera = (Camera)EditorGUILayout.ObjectField(new GUIContent("Camera", "Camera attached to the controller."), fpc.playerCamera, typeof(Camera), true);
         fpc.fov = EditorGUILayout.Slider(new GUIContent("Field of View", "The camera’s view angle. Changes the player camera directly."), fpc.fov, fpc.zoomFOV, 179f);
         fpc.cameraCanMove = EditorGUILayout.ToggleLeft(new GUIContent("Enable Camera Rotation", "Determines if the camera is allowed to move."), fpc.cameraCanMove);
+
+        fpc.GrapplePoint = (GameObject)EditorGUILayout.ObjectField(new GUIContent("Grapple", "Spawning GrapplePoint prefab."), fpc.GrapplePoint, typeof(GameObject), true);
 
         GUI.enabled = fpc.cameraCanMove;
         fpc.invertCamera = EditorGUILayout.ToggleLeft(new GUIContent("Invert Camera Rotation", "Inverts the up and down movement of the camera."), fpc.invertCamera);
