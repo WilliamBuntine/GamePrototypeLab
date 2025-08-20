@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 9fc0d4010bbf28b4594072e72b8655ab
+guid: 167a5ec0045348e4997182aa0e0fcea2
 DefaultImporter:
   externalObjects: {}
   userData: 
@@ -10,5 +10,5 @@ AssetOrigin:
   productId: 189884
   packageName: Modular First Person Controller
   packageVersion: 1.0.1
-  assetPath: Assets/ModularFirstPersonController/DemoScene/Demo.unity
+  assetPath: Assets/ModularFirstPersonController/How To Use.pdf
   uploadId: 428261
