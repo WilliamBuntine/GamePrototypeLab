@@ -21,10 +21,6 @@ public class FirstPersonController : MonoBehaviour
     private Rigidbody rb;
     SpringJoint currentJoint;
     Transform currentGrapplePoint;
-
-    public GameObject GrapplePoint;
-    #region Camera Movement Variables
-    private float offSurfaceOffset = 0.01f;
     Camera cam;
     RaycastHit hit;
     public Camera playerCamera;
@@ -57,7 +53,6 @@ public class FirstPersonController : MonoBehaviour
     // Internal Variables
     private bool isZoomed = false;
 
-    #endregion
     #endregion
 
     #region Movement Variables
