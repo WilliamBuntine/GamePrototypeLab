@@ -4667,7 +4667,7 @@ GameObject:
   - component: {fileID: 1416208301}
   - component: {fileID: 1416208309}
   m_Layer: 0
-  m_Name: Player
+  m_Name: PLAYER
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4821,7 +4821,7 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 4294967295
-  mouseSensitivity: 200
+  mouseSensitivity: 1000
   playerCamera: {fileID: 1289486707}
 --- !u!136 &1416208305
 CapsuleCollider:
@@ -6769,6 +6769,7 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 705507995}
+  - {fileID: 1719330755}
   - {fileID: 841781652}
   - {fileID: 1425695107}
   - {fileID: 2143771603}
@@ -6778,6 +6779,5 @@ SceneRoots:
   - {fileID: 845140684}
   - {fileID: 2030366257}
   - {fileID: 1307890486}
-  - {fileID: 1416208308}
   - {fileID: 932442582}
-  - {fileID: 1719330755}
+  - {fileID: 1416208308}
