@@ -16,11 +16,7 @@ using UnityEngine.UI;
 
 public class FirstPersonController : MonoBehaviour
 {
-    // Grapple Shit
-    public GameObject grapplePointPrefab;
-    private Rigidbody rb;
-    SpringJoint currentJoint;
-    Transform currentGrapplePoint;
+    Rigidbody rb;
     Camera cam;
     RaycastHit hit;
     public Camera playerCamera;
@@ -127,11 +123,6 @@ public class FirstPersonController : MonoBehaviour
     public float bobSpeed = 10f;
     public Vector3 bobAmount = new Vector3(.15f, .05f, 0f);
 
-    #region GrappleMechanics
-    public float maxDistance = 50f;
-    public float reelSpeed = 50f;
-
-    #endregion
     #endregion
 
     
@@ -140,55 +131,6 @@ public class FirstPersonController : MonoBehaviour
     private float timer = 0;
 
     #endregion
-
-    void TryStartGrapple()
-    {
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        RaycastHit hit;
-
-        if (Physics.Raycast(ray, out hit, maxDistance))
-        {
-            if (grapplePointPrefab != null)
-            {
-                GameObject grapplePoint = Instantiate(
-                    grapplePointPrefab,
-                    hit.point,
-                    Quaternion.identity
-                );
-
-                grapplePoint.transform.SetParent(hit.collider.transform);
-
-                currentGrapplePoint = grapplePoint.transform;
-
-                currentJoint = gameObject.AddComponent<SpringJoint>();
-                currentJoint.autoConfigureConnectedAnchor = false;
-                currentJoint.connectedAnchor = currentGrapplePoint.position;
-
-                float distance = Vector3.Distance(transform.position, currentGrapplePoint.position);
-                currentJoint.maxDistance = distance;
-                currentJoint.minDistance = 0f;
-                currentJoint.spring = 50f;
-                currentJoint.damper = 5f;
-                currentJoint.massScale = 1f;
-            }
-        }
-    }
-
-    void StopGrapple()
-    {
-        if (currentJoint != null)
-            Destroy(currentJoint);
-
-        if (currentGrapplePoint != null)
-            Destroy(currentGrapplePoint.gameObject);
-    }
-
-
-
-
-
-
-    
 
     private void Awake()
     {
@@ -263,25 +205,6 @@ public class FirstPersonController : MonoBehaviour
     {
         #region Camera
 
-        if (Input.GetMouseButtonDown(0)) // left click to grapple
-        {
-            TryStartGrapple();
-        }
-
-        if (Input.GetMouseButtonUp(0)) // release grapple
-        {
-            StopGrapple();
-        }
-
-        if (currentJoint != null)
-        {
-            // Reel the rope in
-            currentJoint.maxDistance -= reelSpeed * Time.deltaTime;
-
-            // Don’t let it go below minDistance
-            if (currentJoint.maxDistance < currentJoint.minDistance)
-                currentJoint.maxDistance = currentJoint.minDistance;
-        }
 
         // Control camera movement
         if (cameraCanMove)
