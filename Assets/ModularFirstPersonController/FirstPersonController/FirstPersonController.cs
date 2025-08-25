@@ -22,8 +22,11 @@ public class FirstPersonController : MonoBehaviour
     SpringJoint currentJoint;
     Transform currentGrapplePoint;
 
+    public GameObject GrapplePoint;
     #region Camera Movement Variables
-
+    private float offSurfaceOffset = 0.01f;
+    Camera cam;
+    RaycastHit hit;
     public Camera playerCamera;
 
     public float fov = 60f;
