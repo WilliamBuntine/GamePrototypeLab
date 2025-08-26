@@ -1,8 +1,10 @@
 using UnityEngine;
+[RequireComponent(typeof(Rigidbody), typeof(CapsuleCollider))]
 
 public class Swinging : MonoBehaviour
 {
-
+    private PlayerMove playermove;
+    private Rigidbody rb;
     [Header("Input")]
     public KeyCode swingKey = KeyCode.Mouse0;
 
@@ -25,17 +27,20 @@ public class Swinging : MonoBehaviour
     public float jointSpring = 2f;   
     public float jointDamper = 0.5f;  
     public float jointMassScale = 1f; 
-
     private float maxSwingDistance = 25f;
     private Vector3 swingPoint;
-
     private SpringJoint joint;
+
+    //Air mobility
+    public float sideThrust = 8f;
+    public float upThrust = 1.2f;
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-
+        playermove = GetComponent<PlayerMove>();
+        rb = GetComponent<Rigidbody>();
     }
 
     // Update is called once per frame
@@ -47,12 +52,32 @@ public class Swinging : MonoBehaviour
         {
             StartSwing();
             playerController.grappling = true;
-        } 
+        }
+        // Advanced rope mechanics
+        if (!playermove.grounded && Input.GetKeyDown(KeyCode.W))
+        {
+            float upwardForce = Mathf.Abs(Physics.gravity.y) * rb.mass * upThrust;
+            rb.AddForce(Vector3.up * upwardForce, ForceMode.Force);
+        }
+         if (!playermove.grounded && Input.GetKeyDown(KeyCode.A))
+        {
+            rb.AddForce(-player.right * sideThrust, ForceMode.Impulse);
+        }
+        if (!playermove.grounded && Input.GetKeyDown(KeyCode.S))
+        {
+            float upwardForce = Mathf.Abs(Physics.gravity.y) * rb.mass * upThrust;
+            rb.AddForce(Vector3.down * upwardForce, ForceMode.Force);
+        }
+        if (!playermove.grounded && Input.GetKeyDown(KeyCode.D))
+        {
+            rb.AddForce(player.right * sideThrust, ForceMode.Impulse);
+        }
+        
+       
         if (Input.GetKeyUp(swingKey))
         {
             StopSwing();
             playerController.grappling = false;
-
         }
 
     }

@@ -19,7 +19,7 @@ public class PlayerMove : MonoBehaviour
 
     private Rigidbody rb;
     private float xRotation = 0f;
-    private bool grounded;
+    public bool grounded {get; private set;}
     private Vector3 inputDir;
 
     void Start()
@@ -44,7 +44,10 @@ public class PlayerMove : MonoBehaviour
         inputDir = (transform.right * moveX + transform.forward * moveZ).normalized;
 
         if (Input.GetButtonDown("Jump") && grounded && !grappling)
+        {
             Jump();
+        }
+        
     }
 
     void FixedUpdate()
