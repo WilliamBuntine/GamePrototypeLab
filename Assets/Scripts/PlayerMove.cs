@@ -8,10 +8,15 @@ public class PlayerMove : MonoBehaviour
     public float walkSpeed = 7f;
     public float sprintSpeed = 12f;
     public float jumpForce = 7f;
-    public float groundFriction = 12f;   // higher = stops faster on ground
-    public float airControl = 0.5f;      // % of control in air
+    public float groundFriction = 12f;
+    public float airControl = 0.5f;
     public float groundCheckDistance = 0.5f;
     public LayerMask groundMask;
+
+    [Header("Wall Jump Settings")]
+    public WallDetector wallDetector;
+    public float wallPushAwayForce = 5f;
+    public float wallPushUpForce = 3f;
 
     [Header("Look Settings")]
     public float mouseSensitivity = 100f;
@@ -47,15 +52,18 @@ public class PlayerMove : MonoBehaviour
         {
             if (grounded)
             {
-                Jump();
+                Jump(Vector3.up);
+            }
+            else if (wallDetector != null && wallDetector.nearWall)
+            {
+                WallJump();
             }
         }
     }
 
     void FixedUpdate()
     {
-        if (grounded)
-            HandleMovement();
+        HandleMovement();
     }
 
     void HandleLook()
@@ -74,30 +82,46 @@ public class PlayerMove : MonoBehaviour
     {
         float targetSpeed = Input.GetKey(KeyCode.LeftShift) ? sprintSpeed : walkSpeed;
 
-        // If input pressed → accelerate
         if (inputDir.sqrMagnitude > 0.01f)
         {
-            Vector3 forceDir = inputDir * targetSpeed * 10f;
-            if (grounded)
+            if (grounded || (grappling && wallDetector != null && wallDetector.nearWall))
+            {
+                Vector3 desiredVel = inputDir * targetSpeed;
+                Vector3 forceDir = (desiredVel - new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z)) * 10f;
                 rb.AddForce(forceDir, ForceMode.Force);
+            }
             else
-                rb.AddForce(forceDir * airControl, ForceMode.Force);
+            {
+                Vector3 horizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+                Vector3 airForce = inputDir * targetSpeed * airControl;
+                rb.AddForce(airForce, ForceMode.Acceleration);
+            }
         }
-        // If no input and grounded → apply friction to stop sliding
         else if (grounded)
         {
+            // friction only on ground
             Vector3 horizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
             Vector3 frictionForce = -horizontalVel * groundFriction;
             rb.AddForce(frictionForce, ForceMode.Acceleration);
         }
 
-        ClampSpeed();
+        //ClampSpeed();
     }
 
-    void Jump()
+
+    void Jump(Vector3 direction)
     {
-        rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z); // reset Y
-        rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+        // reset vertical velocity
+        rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+        rb.AddForce(direction * jumpForce, ForceMode.Impulse);
+    }
+
+    void WallJump()
+    {
+        if (wallDetector == null || wallDetector.wallNormal == Vector3.zero) return;
+
+        Vector3 jumpDir = wallDetector.wallNormal * wallPushAwayForce + Vector3.up * wallPushUpForce;
+        Jump(jumpDir);
     }
 
     void GroundCheck()
@@ -110,10 +134,13 @@ public class PlayerMove : MonoBehaviour
         Vector3 flatVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
         float maxSpeed = Input.GetKey(KeyCode.LeftShift) ? sprintSpeed : walkSpeed;
 
-        if (flatVel.magnitude > maxSpeed)
+        if (grounded || (grappling && wallDetector != null && wallDetector.nearWall))
         {
-            Vector3 limitedVel = flatVel.normalized * maxSpeed;
-            rb.linearVelocity = new Vector3(limitedVel.x, rb.linearVelocity.y, limitedVel.z);
+            if (flatVel.magnitude > maxSpeed)
+            {
+                Vector3 limitedVel = flatVel.normalized * maxSpeed;
+                rb.linearVelocity = new Vector3(limitedVel.x, rb.linearVelocity.y, limitedVel.z);
+            }
         }
     }
 }

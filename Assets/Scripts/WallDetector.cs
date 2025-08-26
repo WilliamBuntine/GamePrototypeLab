@@ -7,16 +7,16 @@ public class WallDetector : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        // Check only for walls tagged "Jumpable"
         if (other.CompareTag("Jumpable"))
         {
             nearWall = true;
 
-            // Calculate normal away from wall
-            Vector3 closestPoint = other.ClosestPoint(transform.position);
-            wallNormal = (transform.position - closestPoint).normalized;
+            // Direction from player to collider center
+            Vector3 dir = (transform.position - other.ClosestPointOnBounds(transform.position)).normalized;
+            wallNormal = dir;
         }
     }
+
 
     private void OnTriggerExit(Collider other)
     {
