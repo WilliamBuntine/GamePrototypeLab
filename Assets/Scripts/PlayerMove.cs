@@ -43,8 +43,13 @@ public class PlayerMove : MonoBehaviour
         float moveZ = Input.GetAxisRaw("Vertical");
         inputDir = (transform.right * moveX + transform.forward * moveZ).normalized;
 
-        if (Input.GetButtonDown("Jump") && grounded && !grappling)
-            Jump();
+        if (Input.GetButtonDown("Jump"))
+        {
+            if (grounded)
+            {
+                Jump();
+            }
+        }
     }
 
     void FixedUpdate()
