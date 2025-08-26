@@ -33,8 +33,8 @@ public class Swinging : MonoBehaviour
 
     //Air mobility
     public float sideThrust = 8f;
-    public float upThrust = 1.2f;
-
+    public float upThrust = 5f;
+    public bool isSwinging = false;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -45,7 +45,7 @@ public class Swinging : MonoBehaviour
 
     // Update is called once per frame
     
-
+    bool wHeld, aHeld, sHeld, dHeld;
     void Update()
     {
         if (Input.GetKeyDown(swingKey))
@@ -53,25 +53,10 @@ public class Swinging : MonoBehaviour
             StartSwing();
             playerController.grappling = true;
         }
-        // Advanced rope mechanics
-        if (!playermove.grounded && Input.GetKeyDown(KeyCode.W))
-        {
-            float upwardForce = Mathf.Abs(Physics.gravity.y) * rb.mass * upThrust;
-            rb.AddForce(Vector3.up * upwardForce, ForceMode.Force);
-        }
-         if (!playermove.grounded && Input.GetKeyDown(KeyCode.A))
-        {
-            rb.AddForce(-player.right * sideThrust, ForceMode.Impulse);
-        }
-        if (!playermove.grounded && Input.GetKeyDown(KeyCode.S))
-        {
-            float upwardForce = Mathf.Abs(Physics.gravity.y) * rb.mass * upThrust;
-            rb.AddForce(Vector3.down * upwardForce, ForceMode.Force);
-        }
-        if (!playermove.grounded && Input.GetKeyDown(KeyCode.D))
-        {
-            rb.AddForce(player.right * sideThrust, ForceMode.Impulse);
-        }
+       wHeld = Input.GetKey(KeyCode.W);
+       aHeld = Input.GetKey(KeyCode.A);
+       sHeld = Input.GetKey(KeyCode.S);
+       dHeld = Input.GetKey(KeyCode.D);
         
        
         if (Input.GetKeyUp(swingKey))
@@ -106,6 +91,34 @@ public class Swinging : MonoBehaviour
         float targetMax = Mathf.Max(shortestDistance + adaptiveLeeway, hardMin);
 
         joint.maxDistance = targetMax;
+
+        // Advanced rope mechanics
+        if (!playermove.grounded)
+        {
+            if (wHeld)
+            {
+
+                rb.AddForce(player.up * sideThrust, ForceMode.Acceleration);
+                isSwinging = true;
+            }
+            if (aHeld)
+            {
+                rb.AddForce(-player.right * sideThrust, ForceMode.Acceleration);
+                isSwinging = true;
+
+            }
+            if (sHeld)
+            {
+                rb.AddForce(-player.up * sideThrust, ForceMode.Acceleration);
+                isSwinging = true;
+            }
+            if (dHeld)
+            {
+                rb.AddForce(player.right * sideThrust, ForceMode.Acceleration);
+                isSwinging = true;
+            }
+        }
+        
     }
 
     void StartSwing()
