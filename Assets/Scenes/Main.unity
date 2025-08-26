@@ -3931,7 +3931,7 @@ GameObject:
   - component: {fileID: 1416208301}
   - component: {fileID: 1416208309}
   m_Layer: 0
-  m_Name: Player
+  m_Name: PLAYER
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4090,7 +4090,7 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 4294967295
-  mouseSensitivity: 200
+  mouseSensitivity: 1000
   playerCamera: {fileID: 1289486707}
 --- !u!136 &1416208305
 CapsuleCollider:

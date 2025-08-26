@@ -13,6 +13,13 @@ public class Swinging : MonoBehaviour
     public LayerMask Grappleable;
     private Vector3 currentGrapplePosition;
 
+    //Advanced rope mechanics
+    private float shortestDistance;
+    private float minLeeway = 0.2f;
+    private float leewayFraction = 0.05f;
+    private float adaptiveLeeway;
+
+
 
     [Header("Swinging")]
     public float jointSpring = 2f;   
@@ -21,6 +28,7 @@ public class Swinging : MonoBehaviour
 
     private float maxSwingDistance = 25f;
     private Vector3 swingPoint;
+
     private SpringJoint joint;
 
 
@@ -31,6 +39,8 @@ public class Swinging : MonoBehaviour
     }
 
     // Update is called once per frame
+    
+
     void Update()
     {
         if (Input.GetKeyDown(swingKey))
@@ -51,6 +61,27 @@ public class Swinging : MonoBehaviour
     {
         DrawRope();
     }
+    void FixedUpdate()
+    {
+        if (joint == null) return;
+
+        float currentDist = Vector3.Distance(player.position, swingPoint);
+
+        // Ratchet: only ever decrease
+        if (currentDist < shortestDistance)
+            shortestDistance = currentDist;
+
+        // Adaptive leeway: scales with how close you've reeled in
+        float adaptiveLeeway = Mathf.Max(minLeeway, shortestDistance * leewayFraction);
+
+        // Hard minimum for maxDistance so it's always >= minDistance
+        float hardMin = joint.minDistance + 0.01f;
+
+        // New cap: closest-ever + adaptive slack
+        float targetMax = Mathf.Max(shortestDistance + adaptiveLeeway, hardMin);
+
+        joint.maxDistance = targetMax;
+    }
 
     void StartSwing()
     {
@@ -63,12 +94,12 @@ public class Swinging : MonoBehaviour
             joint.connectedAnchor = swingPoint;
 
             float distanceFromPoint = Vector3.Distance(player.position, swingPoint);
-
+            shortestDistance = distanceFromPoint;
             joint.maxDistance = distanceFromPoint * 0.8f;
             joint.minDistance = distanceFromPoint * 0.25f;
 
-            joint.spring = 4.5f;
-            joint.damper = 7f;
+            joint.spring = 10f;
+            joint.damper = 14f;
             joint.massScale = 4.5f;
 
             lr.positionCount = 2;
