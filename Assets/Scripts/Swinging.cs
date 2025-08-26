@@ -7,6 +7,7 @@ public class Swinging : MonoBehaviour
     public KeyCode swingKey = KeyCode.Mouse0;
 
     [Header("References")]
+    public PlayerMove playerController;
     public LineRenderer lr;
     public Transform gunTip, cam, player;
     public LayerMask Grappleable;
@@ -14,6 +15,10 @@ public class Swinging : MonoBehaviour
 
 
     [Header("Swinging")]
+    public float jointSpring = 2f;   
+    public float jointDamper = 0.5f;  
+    public float jointMassScale = 1f; 
+
     private float maxSwingDistance = 25f;
     private Vector3 swingPoint;
     private SpringJoint joint;
@@ -28,8 +33,17 @@ public class Swinging : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(swingKey)) StartSwing();
-        if (Input.GetKeyUp(swingKey)) StopSwing();
+        if (Input.GetKeyDown(swingKey))
+        {
+            StartSwing();
+            playerController.grappling = true;
+        } 
+        if (Input.GetKeyUp(swingKey))
+        {
+            StopSwing();
+            playerController.grappling = false;
+
+        }
 
     }
 

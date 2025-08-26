@@ -1,14 +1,15 @@
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody), typeof(CapsuleCollider))]
-public class FPSControllerWithSwinging : MonoBehaviour
+public class PlayerMove : MonoBehaviour
 {
     [Header("Movement Settings")]
+    public bool grappling = false;
     public float walkSpeed = 7f;
     public float sprintSpeed = 12f;
     public float jumpForce = 7f;
-    public float groundDrag = 6f;
-    public float airMultiplier = 0.5f;
+    public float groundFriction = 12f;   // higher = stops faster on ground
+    public float airControl = 0.5f;      // % of control in air
     public float groundCheckDistance = 0.5f;
     public LayerMask groundMask;
 
@@ -19,17 +20,15 @@ public class FPSControllerWithSwinging : MonoBehaviour
     private Rigidbody rb;
     private float xRotation = 0f;
     private bool grounded;
+    private Vector3 inputDir;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-        rb.freezeRotation = true; // stop tipping over
+        rb.freezeRotation = true;
 
-        // Make sure player has a collider for ground check
         if (!GetComponent<CapsuleCollider>())
-        {
             Debug.LogWarning("Player should have a CapsuleCollider for proper grounding.");
-        }
 
         Cursor.lockState = CursorLockMode.Locked;
     }
@@ -39,19 +38,19 @@ public class FPSControllerWithSwinging : MonoBehaviour
         HandleLook();
         GroundCheck();
 
-        // Apply drag when grounded for snappy stops
-        rb.linearDamping = grounded ? groundDrag : 0f;
+        // Collect input here (for FixedUpdate use)
+        float moveX = Input.GetAxisRaw("Horizontal");
+        float moveZ = Input.GetAxisRaw("Vertical");
+        inputDir = (transform.right * moveX + transform.forward * moveZ).normalized;
 
-        if (Input.GetButtonDown("Jump") && grounded)
-        {
+        if (Input.GetButtonDown("Jump") && grounded && !grappling)
             Jump();
-        }
     }
 
     void FixedUpdate()
     {
-        HandleMovement();
-        ClampSpeed();
+        if (grounded)
+            HandleMovement();
     }
 
     void HandleLook()
@@ -59,10 +58,8 @@ public class FPSControllerWithSwinging : MonoBehaviour
         float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
         float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
 
-        // rotate player left/right
         transform.Rotate(Vector3.up * mouseX);
 
-        // rotate camera up/down
         xRotation -= mouseY;
         xRotation = Mathf.Clamp(xRotation, -90f, 90f);
         playerCamera.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
@@ -70,23 +67,31 @@ public class FPSControllerWithSwinging : MonoBehaviour
 
     void HandleMovement()
     {
-        float moveX = Input.GetAxis("Horizontal");
-        float moveZ = Input.GetAxis("Vertical");
-
-        Vector3 moveDir = (transform.right * moveX + transform.forward * moveZ).normalized;
         float targetSpeed = Input.GetKey(KeyCode.LeftShift) ? sprintSpeed : walkSpeed;
 
-        // Add force relative to grounded/airborne
-        if (grounded)
-            rb.AddForce(moveDir * targetSpeed * 10f, ForceMode.Force);
-        else
-            rb.AddForce(moveDir * targetSpeed * 10f * airMultiplier, ForceMode.Force);
+        // If input pressed → accelerate
+        if (inputDir.sqrMagnitude > 0.01f)
+        {
+            Vector3 forceDir = inputDir * targetSpeed * 10f;
+            if (grounded)
+                rb.AddForce(forceDir, ForceMode.Force);
+            else
+                rb.AddForce(forceDir * airControl, ForceMode.Force);
+        }
+        // If no input and grounded → apply friction to stop sliding
+        else if (grounded)
+        {
+            Vector3 horizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+            Vector3 frictionForce = -horizontalVel * groundFriction;
+            rb.AddForce(frictionForce, ForceMode.Acceleration);
+        }
+
+        ClampSpeed();
     }
 
     void Jump()
     {
-        // reset vertical velocity for consistent jump
-        rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+        rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z); // reset Y
         rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
     }
 
