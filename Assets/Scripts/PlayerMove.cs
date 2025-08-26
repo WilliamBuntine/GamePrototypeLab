@@ -13,6 +13,8 @@ public class PlayerMove : MonoBehaviour
     public float groundCheckDistance = 0.5f;
     public LayerMask groundMask;
 
+    [Header("Slide Settings")]
+
     [Header("Wall Jump Settings")]
     public WallDetector wallDetector;
     public float wallPushAwayForce = 5f;
@@ -143,4 +145,5 @@ public class PlayerMove : MonoBehaviour
             }
         }
     }
+
 }
