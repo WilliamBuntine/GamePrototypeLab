@@ -4821,7 +4821,7 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 4294967295
-  mouseSensitivity: 1000
+  mouseSensitivity: 2000
   playerCamera: {fileID: 1289486707}
 --- !u!136 &1416208305
 CapsuleCollider:

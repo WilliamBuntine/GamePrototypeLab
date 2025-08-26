@@ -81,12 +81,12 @@ public class Swinging : MonoBehaviour
 
             float distanceFromPoint = Vector3.Distance(player.position, swingPoint);
             shortestDistance = distanceFromPoint;
-            joint.maxDistance = distanceFromPoint * 0.8f;
-            joint.minDistance = distanceFromPoint * 0.25f;
+            joint.maxDistance = shortestDistance; ;
+            joint.minDistance = shortestDistance * 0.25f;
 
-            joint.spring = 10f;
-            joint.damper = 14f;
-            joint.massScale = 4.5f;
+            joint.spring = 80f;
+            joint.damper = 25f;
+            joint.massScale = 1f;
 
             lr.positionCount = 2;
             currentGrapplePosition = gunTip.position;
