@@ -4457,6 +4457,7 @@ MonoBehaviour:
   wallPushAwayForce: 1.5
   wallPushUpForce: 1
   walljumpmultiplier: 0.2
+  wallJumpCooldown: 0.5
   mouseSensitivity: 5000
   playerCamera: {fileID: 1289486707}
   cameraSlideHeightAdjust: -0.5

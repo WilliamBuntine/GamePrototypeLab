@@ -31,6 +31,10 @@ public class PlayerMove : MonoBehaviour
 
     public float walljumpmultiplier;
 
+    public float wallJumpCooldown;
+    private float wallJumpTimer = 0f;
+    private bool hasWallJumped;
+
     [Header("Look Settings")]
     public float mouseSensitivity = 100f;
     public Transform playerCamera;
@@ -70,6 +74,17 @@ public class PlayerMove : MonoBehaviour
 
         slideRefresh -= Time.deltaTime;
 
+        if(hasWallJumped)
+        {
+            wallJumpTimer -= Time.deltaTime;
+            if(wallJumpTimer <= 0f)
+            {
+                print("reset wall jump cooldown");
+                hasWallJumped = false;
+                wallJumpTimer = wallJumpCooldown;
+            }
+        }
+
 
         // start slide
         if (Input.GetKeyDown(slideKey) && !isSliding && slideRefresh <= 0f)
@@ -98,9 +113,10 @@ public class PlayerMove : MonoBehaviour
             {
                 Jump(Vector3.up);
             }
-            else if (wallDetector != null && wallDetector.nearWall)
+            else if (wallDetector != null && wallDetector.nearWall && !hasWallJumped)
             {
                 WallJump();
+
             }
             
         }
@@ -204,6 +220,8 @@ public class PlayerMove : MonoBehaviour
 
     void WallJump()
     {
+        hasWallJumped = true;
+        wallJumpTimer = wallJumpCooldown;
         Vector3 horizontalVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
         float speed = horizontalVelocity.magnitude;
         if (wallDetector == null || wallDetector.wallNormal == Vector3.zero) return;
