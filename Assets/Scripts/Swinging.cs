@@ -1,8 +1,11 @@
 using UnityEngine;
+[RequireComponent(typeof(Rigidbody), typeof(CapsuleCollider))]
 
 public class Swinging : MonoBehaviour
 {
-
+    
+    private PlayerMove playermove;
+    private Rigidbody rb;
     [Header("Input")]
     public KeyCode swingKey = KeyCode.Mouse0;
 
@@ -25,34 +28,42 @@ public class Swinging : MonoBehaviour
     public float jointSpring = 2f;   
     public float jointDamper = 0.5f;  
     public float jointMassScale = 1f; 
-
     private float maxSwingDistance = 25f;
     private Vector3 swingPoint;
-
     private SpringJoint joint;
 
+    [Header("Thrust")]
+    public float sideThrust;
+    public float upThrust;
+    public bool isSwinging = false;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-
+        playermove = GetComponent<PlayerMove>();
+        rb = GetComponent<Rigidbody>();
     }
 
     // Update is called once per frame
     
-
+    bool wHeld, aHeld, sHeld, dHeld;
     void Update()
     {
         if (Input.GetKeyDown(swingKey))
         {
             StartSwing();
             playerController.grappling = true;
-        } 
+        }
+       wHeld = Input.GetKey(KeyCode.W);
+       aHeld = Input.GetKey(KeyCode.A);
+       sHeld = Input.GetKey(KeyCode.S);
+       dHeld = Input.GetKey(KeyCode.D);
+        
+       
         if (Input.GetKeyUp(swingKey))
         {
             StopSwing();
             playerController.grappling = false;
-
         }
 
     }
@@ -63,6 +74,8 @@ public class Swinging : MonoBehaviour
     }
     void FixedUpdate()
     {
+
+
         if (joint == null) return;
 
         float currentDist = Vector3.Distance(player.position, swingPoint);
@@ -81,6 +94,34 @@ public class Swinging : MonoBehaviour
         float targetMax = Mathf.Max(shortestDistance + adaptiveLeeway, hardMin);
 
         joint.maxDistance = targetMax;
+
+        // Advanced rope mechanics
+        if (!playermove.grounded)
+        {
+            if (wHeld)
+            {
+
+                rb.AddForce(player.up * sideThrust, ForceMode.Acceleration);
+                isSwinging = true;
+            }
+            if (aHeld)
+            {
+                rb.AddForce(-player.right * sideThrust, ForceMode.Acceleration);
+                isSwinging = true;
+
+            }
+            if (sHeld)
+            {
+                rb.AddForce(-player.up * sideThrust, ForceMode.Acceleration);
+                isSwinging = true;
+            }
+            if (dHeld)
+            {
+                rb.AddForce(player.right * sideThrust, ForceMode.Acceleration);
+                isSwinging = true;
+            }
+        }
+        
     }
 
     void StartSwing()
