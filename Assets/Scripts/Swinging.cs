@@ -31,9 +31,9 @@ public class Swinging : MonoBehaviour
     private Vector3 swingPoint;
     private SpringJoint joint;
 
-    //Air mobility
-    public float sideThrust = 8f;
-    public float upThrust = 5f;
+    [Header("Thrust")]
+    public float sideThrust;
+    public float upThrust;
     public bool isSwinging = false;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
