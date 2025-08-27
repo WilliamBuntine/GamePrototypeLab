@@ -29,6 +29,8 @@ public class PlayerMove : MonoBehaviour
     public float wallPushAwayForce = 5f;
     public float wallPushUpForce = 3f;
 
+    public float walljumpmultiplier;
+
     [Header("Look Settings")]
     public float mouseSensitivity = 100f;
     public Transform playerCamera;
@@ -58,8 +60,11 @@ public class PlayerMove : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
     }
 
+    bool spaceHeld;
     void Update()
     {
+        spaceHeld = Input.GetKey(KeyCode.Space);
+
         HandleLook();
         GroundCheck();
 
@@ -97,6 +102,7 @@ public class PlayerMove : MonoBehaviour
             {
                 WallJump();
             }
+            
         }
     }
 
@@ -198,10 +204,19 @@ public class PlayerMove : MonoBehaviour
 
     void WallJump()
     {
+        Vector3 horizontalVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+        float speed = horizontalVelocity.magnitude;
         if (wallDetector == null || wallDetector.wallNormal == Vector3.zero) return;
-
-        Vector3 jumpDir = wallDetector.wallNormal * wallPushAwayForce + Vector3.up * wallPushUpForce;
-        Jump(jumpDir);
+        if (speed <= 5f)
+        {
+            Vector3 jumpDir = wallDetector.wallNormal * wallPushAwayForce + Vector3.up * wallPushUpForce;
+            Jump(jumpDir);
+        }
+        else if (speed > 5f)
+        {
+            Vector3 jumpDir = wallDetector.wallNormal * (speed * walljumpmultiplier) + Vector3.up * wallPushUpForce;
+            Jump(jumpDir);
+        }
     }
 
     void GroundCheck()
