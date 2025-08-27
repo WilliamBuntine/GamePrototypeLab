@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class Swinging : MonoBehaviour
 {
+    
     private PlayerMove playermove;
     private Rigidbody rb;
     [Header("Input")]
@@ -73,6 +74,8 @@ public class Swinging : MonoBehaviour
     }
     void FixedUpdate()
     {
+
+
         if (joint == null) return;
 
         float currentDist = Vector3.Distance(player.position, swingPoint);
