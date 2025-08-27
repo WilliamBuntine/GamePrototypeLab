@@ -14,6 +14,11 @@ public class PlayerMove : MonoBehaviour
     public LayerMask groundMask;
 
     [Header("Slide Settings")]
+    public KeyCode slideKey = KeyCode.LeftControl;
+    public float slideFriction = 0.5f;  // much lower than groundFriction
+    public float slideDuration = 1.0f;
+    private bool sliding = false;
+    private float slideTimer;
 
     [Header("Wall Jump Settings")]
     public WallDetector wallDetector;
@@ -26,17 +31,13 @@ public class PlayerMove : MonoBehaviour
 
     private Rigidbody rb;
     private float xRotation = 0f;
-    public bool grounded {get; private set;}
+    public bool grounded { get; private set; }
     private Vector3 inputDir;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
-
-        if (!GetComponent<CapsuleCollider>())
-            Debug.LogWarning("Player should have a CapsuleCollider for proper grounding.");
-
         Cursor.lockState = CursorLockMode.Locked;
     }
 
@@ -45,11 +46,34 @@ public class PlayerMove : MonoBehaviour
         HandleLook();
         GroundCheck();
 
-        // Collect input here (for FixedUpdate use)
-        float moveX = Input.GetAxisRaw("Horizontal");
-        float moveZ = Input.GetAxisRaw("Vertical");
-        inputDir = (transform.right * moveX + transform.forward * moveZ).normalized;
+        // Slide input
+        if (Input.GetKeyDown(slideKey) && grounded && !sliding)
+        {
+            StartSlide();
+        }
 
+        if (sliding)
+        {
+            slideTimer -= Time.deltaTime;
+            if (slideTimer <= 0 || rb.linearVelocity.magnitude < 1f)
+            {
+                StopSlide();
+            }
+        }
+
+        // Collect movement input ONLY if not sliding
+        if (!sliding)
+        {
+            float moveX = Input.GetAxisRaw("Horizontal");
+            float moveZ = Input.GetAxisRaw("Vertical");
+            inputDir = (transform.right * moveX + transform.forward * moveZ).normalized;
+        }
+        else
+        {
+            inputDir = Vector3.zero; // no player steering
+        }
+
+        // Jump input
         if (Input.GetButtonDown("Jump"))
         {
             if (grounded)
@@ -84,6 +108,15 @@ public class PlayerMove : MonoBehaviour
     {
         float targetSpeed = Input.GetKey(KeyCode.LeftShift) ? sprintSpeed : walkSpeed;
 
+        if (sliding)
+        {
+            // Apply reduced friction instead of movement
+            Vector3 horizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+            Vector3 frictionForce = -horizontalVel * slideFriction;
+            rb.AddForce(frictionForce, ForceMode.Acceleration);
+            return;
+        }
+
         if (inputDir.sqrMagnitude > 0.01f)
         {
             if (grounded || (grappling && wallDetector != null && wallDetector.nearWall))
@@ -94,26 +127,21 @@ public class PlayerMove : MonoBehaviour
             }
             else
             {
-                Vector3 horizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
                 Vector3 airForce = inputDir * targetSpeed * airControl;
                 rb.AddForce(airForce, ForceMode.Acceleration);
             }
         }
         else if (grounded)
         {
-            // friction only on ground
+            // normal ground friction
             Vector3 horizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
             Vector3 frictionForce = -horizontalVel * groundFriction;
             rb.AddForce(frictionForce, ForceMode.Acceleration);
         }
-
-        //ClampSpeed();
     }
-
 
     void Jump(Vector3 direction)
     {
-        // reset vertical velocity
         rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
         rb.AddForce(direction * jumpForce, ForceMode.Impulse);
     }
@@ -121,7 +149,6 @@ public class PlayerMove : MonoBehaviour
     void WallJump()
     {
         if (wallDetector == null || wallDetector.wallNormal == Vector3.zero) return;
-
         Vector3 jumpDir = wallDetector.wallNormal * wallPushAwayForce + Vector3.up * wallPushUpForce;
         Jump(jumpDir);
     }
@@ -131,19 +158,14 @@ public class PlayerMove : MonoBehaviour
         grounded = Physics.Raycast(transform.position, Vector3.down, groundCheckDistance, groundMask);
     }
 
-    void ClampSpeed()
+    void StartSlide()
     {
-        Vector3 flatVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
-        float maxSpeed = Input.GetKey(KeyCode.LeftShift) ? sprintSpeed : walkSpeed;
-
-        if (grounded || (grappling && wallDetector != null && wallDetector.nearWall))
-        {
-            if (flatVel.magnitude > maxSpeed)
-            {
-                Vector3 limitedVel = flatVel.normalized * maxSpeed;
-                rb.linearVelocity = new Vector3(limitedVel.x, rb.linearVelocity.y, limitedVel.z);
-            }
-        }
+        sliding = true;
+        slideTimer = slideDuration;
     }
 
+    void StopSlide()
+    {
+        sliding = false;
+    }
 }
