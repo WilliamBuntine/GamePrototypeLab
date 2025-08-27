@@ -37,6 +37,12 @@ public class Swinging : MonoBehaviour
     public float upThrust;
     public bool isSwinging = false;
 
+    [Header("Grapple Reel")]
+    public float reelStrength = 6f;       // how hard to pull toward the point (m/s)
+
+    public float reelRate = 10f;         // fraction of distance to reel in per second
+    private bool yankRequested;           // set on key down, consumed in FixedUpdate
+    
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -46,7 +52,7 @@ public class Swinging : MonoBehaviour
 
     // Update is called once per frame
     
-    bool wHeld, aHeld, sHeld, dHeld;
+    bool wHeld, aHeld, sHeld, dHeld, spaceheld;
     void Update()
     {
         if (Input.GetKeyDown(swingKey))
@@ -54,12 +60,23 @@ public class Swinging : MonoBehaviour
             StartSwing();
             playerController.grappling = true;
         }
-       wHeld = Input.GetKey(KeyCode.W);
-       aHeld = Input.GetKey(KeyCode.A);
-       sHeld = Input.GetKey(KeyCode.S);
-       dHeld = Input.GetKey(KeyCode.D);
-        
-       
+        wHeld = Input.GetKey(KeyCode.W);
+        aHeld = Input.GetKey(KeyCode.A);
+        sHeld = Input.GetKey(KeyCode.S);
+        dHeld = Input.GetKey(KeyCode.D);
+        spaceheld = Input.GetKey(KeyCode.Space);
+
+        float gravityStrength = Mathf.Abs(Physics.gravity.y);
+        float gravityScale = 0.5f;
+        float compensation = gravityStrength * rb.mass * (1f - gravityScale);
+        if (isSwinging && spaceheld)
+        {
+            Vector3 toAnchor = (swingPoint - player.position).normalized;
+
+            rb.AddForce(toAnchor * reelStrength, ForceMode.Acceleration);
+            rb.AddForce(Vector3.up * compensation, ForceMode.Acceleration);
+        }
+
         if (Input.GetKeyUp(swingKey))
         {
             StopSwing();
@@ -145,6 +162,7 @@ public class Swinging : MonoBehaviour
 
             lr.positionCount = 2;
             currentGrapplePosition = gunTip.position;
+            isSwinging = true;
         }
     }
 
@@ -152,7 +170,7 @@ public class Swinging : MonoBehaviour
     {
         lr.positionCount = 0;
         Destroy(joint);
-
+        isSwinging = false;
     }
 
     void DrawRope()
