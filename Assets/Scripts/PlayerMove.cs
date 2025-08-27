@@ -47,7 +47,7 @@ public class PlayerMove : MonoBehaviour
         GroundCheck();
 
         // Slide input
-        if (Input.GetKeyDown(slideKey) && grounded && !sliding)
+        if (Input.GetKeyDown(slideKey) && !sliding)
         {
             StartSlide();
         }
