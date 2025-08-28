@@ -116,7 +116,7 @@ public class PlayerMove : MonoBehaviour
             {
                 Jump(Vector3.up);
             }
-            else if (wallDetector != null && wallDetector.nearWall && !hasWallJumped)
+            else if (wallDetector != null && wallDetector.nearWall && !hasWallJumped && !grappling)
             {
                 WallJump();
 
