@@ -66,15 +66,10 @@ public class Swinging : MonoBehaviour
         dHeld = Input.GetKey(KeyCode.D);
         spaceheld = Input.GetKey(KeyCode.Space);
 
-        float gravityStrength = Mathf.Abs(Physics.gravity.y);
-        float gravityScale = 0.5f;
-        float compensation = gravityStrength * rb.mass * (1f - gravityScale);
+       
         if (isSwinging && spaceheld)
         {
-            Vector3 toAnchor = (swingPoint - player.position).normalized;
-
-            rb.AddForce(toAnchor * reelStrength, ForceMode.Acceleration);
-            rb.AddForce(Vector3.up * compensation, ForceMode.Acceleration);
+            GrappleReel();
         }
 
         if (Input.GetKeyUp(swingKey))
@@ -164,6 +159,17 @@ public class Swinging : MonoBehaviour
             currentGrapplePosition = gunTip.position;
             isSwinging = true;
         }
+    }
+
+    void GrappleReel()
+    {
+        float gravityStrength = Mathf.Abs(Physics.gravity.y);
+        float gravityScale = 0.5f;
+        float compensation = gravityStrength * rb.mass * (1f - gravityScale);
+        Vector3 toAnchor = (swingPoint - player.position).normalized;
+
+        rb.AddForce(toAnchor * reelStrength, ForceMode.Acceleration);
+        rb.AddForce(Vector3.up * (0.5f * compensation), ForceMode.Acceleration);
     }
 
     void StopSwing()

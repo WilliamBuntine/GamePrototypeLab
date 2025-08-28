@@ -4424,9 +4424,11 @@ MonoBehaviour:
   jointSpring: 2
   jointDamper: 0.5
   jointMassScale: 1
-  sideThrust: 3
+  sideThrust: 4
   upThrust: 2.5
   isSwinging: 0
+  reelStrength: 6
+  reelRate: 10
 --- !u!114 &1416208303
 MonoBehaviour:
   m_ObjectHideFlags: 0
