@@ -37,6 +37,12 @@ public class Swinging : MonoBehaviour
     public float upThrust;
     public bool isSwinging = false;
 
+    [Header("Grapple Reel")]
+    public float reelStrength = 6f;       // how hard to pull toward the point (m/s)
+
+    public float reelRate = 10f;         // fraction of distance to reel in per second
+    private bool yankRequested;           // set on key down, consumed in FixedUpdate
+    
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -46,20 +52,23 @@ public class Swinging : MonoBehaviour
 
     // Update is called once per frame
     
-    bool wHeld, aHeld, sHeld, dHeld;
+    bool wHeld, aHeld, sHeld, dHeld, spaceheld;
     void Update()
     {
         if (Input.GetKeyDown(swingKey))
         {
             StartSwing();
-            playerController.grappling = true;
+            playerController.grappling = true;  //Assisting PlayerMove script to know when grappling
         }
-       wHeld = Input.GetKey(KeyCode.W);
-       aHeld = Input.GetKey(KeyCode.A);
-       sHeld = Input.GetKey(KeyCode.S);
-       dHeld = Input.GetKey(KeyCode.D);
-        
+        wHeld = Input.GetKey(KeyCode.W);
+        aHeld = Input.GetKey(KeyCode.A);
+        sHeld = Input.GetKey(KeyCode.S);
+        dHeld = Input.GetKey(KeyCode.D);
+        spaceheld = Input.GetKey(KeyCode.Space);
+
        
+        
+
         if (Input.GetKeyUp(swingKey))
         {
             StopSwing();
@@ -74,7 +83,10 @@ public class Swinging : MonoBehaviour
     }
     void FixedUpdate()
     {
-
+        if (isSwinging && spaceheld)
+        {
+            GrappleReel();
+        }
 
         if (joint == null) return;
 
@@ -98,27 +110,36 @@ public class Swinging : MonoBehaviour
         // Advanced rope mechanics
         if (!playermove.grounded)
         {
+            Vector3 r = player.position - swingPoint;
+            Vector3 rHoriz = Vector3.ProjectOnPlane(r, Vector3.up);
+            float rLen = rHoriz.magnitude;
             if (wHeld)
             {
-
-                rb.AddForce(player.up * sideThrust, ForceMode.Acceleration);
-                isSwinging = true;
+                ReelUp();
+                
             }
-            if (aHeld)
-            {
-                rb.AddForce(-player.right * sideThrust, ForceMode.Acceleration);
-                isSwinging = true;
-
-            }
+            
             if (sHeld)
             {
-                rb.AddForce(-player.up * sideThrust, ForceMode.Acceleration);
-                isSwinging = true;
+                ReelDown();
             }
-            if (dHeld)
+            
+
+            if (rLen > 0.001f)
             {
-                rb.AddForce(player.right * sideThrust, ForceMode.Acceleration);
-                isSwinging = true;
+                Vector3 tangentCCW = Vector3.Cross(Vector3.up, rHoriz).normalized;
+                Vector3 tangentCW = -tangentCCW;
+                if (aHeld)
+                {
+                    ReelRight();
+                    
+
+                }
+                if (dHeld)
+                {
+                    ReelLeft();
+                    
+                }
             }
         }
         
@@ -145,14 +166,60 @@ public class Swinging : MonoBehaviour
 
             lr.positionCount = 2;
             currentGrapplePosition = gunTip.position;
+            isSwinging = true;
         }
+    }
+
+    void GrappleReel()
+    {
+        float g = Mathf.Abs(Physics.gravity.y);
+        float hardMin = joint.minDistance + 0.01f;
+        Vector3 toAnchor = (swingPoint - player.position).normalized;
+        rb.AddForce(Vector3.up * (g * (1f - 0.5f)), ForceMode.Acceleration); // counteract gravity partially
+
+        rb.AddForce(toAnchor * reelStrength, ForceMode.Acceleration);
+        joint.maxDistance = Mathf.Max(hardMin, joint.maxDistance - reelRate * Time.fixedDeltaTime);
+
+    }
+
+    void ReelUp()
+    {
+        
+
+        rb.AddForce(player.up * sideThrust, ForceMode.Acceleration);
+        isSwinging = true;
+    }
+
+    void ReelDown()
+    {
+        rb.AddForce(-player.up * sideThrust, ForceMode.Acceleration);
+    }
+
+    void ReelLeft()
+    {
+        Vector3 r = player.position - swingPoint;
+        Vector3 rHoriz = Vector3.ProjectOnPlane(r, Vector3.up);
+        if (rHoriz.sqrMagnitude < 1e-6f) return;
+
+        Vector3 tangentCW = -Vector3.Cross(Vector3.up, rHoriz).normalized;
+        rb.AddForce(tangentCW * sideThrust, ForceMode.Acceleration);
+    }
+
+    void ReelRight()
+    {
+        Vector3 r = player.position - swingPoint;
+        Vector3 rHoriz = Vector3.ProjectOnPlane(r, Vector3.up);
+        if (rHoriz.sqrMagnitude < 1e-6f) return;
+
+        Vector3 tangentCCW = Vector3.Cross(Vector3.up, rHoriz).normalized;
+        rb.AddForce(tangentCCW * sideThrust, ForceMode.Acceleration);
     }
 
     void StopSwing()
     {
         lr.positionCount = 0;
         Destroy(joint);
-
+        isSwinging = false;
     }
 
     void DrawRope()

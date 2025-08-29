@@ -3,6 +3,7 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody), typeof(CapsuleCollider))]
 public class PlayerMove : MonoBehaviour
 {
+    private Swinging swinging;
     [Header("Movement Settings")]
     public bool grappling = false;
     public float walkSpeed = 7f;
@@ -62,6 +63,8 @@ public class PlayerMove : MonoBehaviour
         originalCameraLocalPos = playerCamera.localPosition;
 
         Cursor.lockState = CursorLockMode.Locked;
+        swinging = GetComponent<Swinging>();
+
     }
 
     bool spaceHeld;
@@ -109,11 +112,11 @@ public class PlayerMove : MonoBehaviour
 
         if (Input.GetButtonDown("Jump"))
         {
-            if (grounded)
+            if (grounded && !swinging.isSwinging)
             {
                 Jump(Vector3.up);
             }
-            else if (wallDetector != null && wallDetector.nearWall && !hasWallJumped)
+            else if (wallDetector != null && wallDetector.nearWall && !hasWallJumped && !grappling)
             {
                 WallJump();
 
