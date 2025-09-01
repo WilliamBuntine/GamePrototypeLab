@@ -89,7 +89,7 @@ public class PlayerMove : MonoBehaviour
 
         if (Input.GetButtonDown("Jump"))
         {
-            if (grounded && !grappling)
+            if (grounded)
             {
                 Jump(Vector3.up);
             }

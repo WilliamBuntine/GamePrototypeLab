@@ -76,11 +76,6 @@ public class Swinging : MonoBehaviour
     }
     void FixedUpdate()
     {
-        if (spaceheld && isSwinging)
-        {
-            GrappleReel();
-        }
-
         if (joint == null) return;
 
         float currentDist = Vector3.Distance(player.position, swingPoint);
@@ -128,10 +123,6 @@ public class Swinging : MonoBehaviour
             if (dHeld && vHoriz.magnitude < maxSpeed)
             {
                 ReelRight();
-            }
-            else if (dHeld && vHoriz.magnitude > maxSpeed)
-            {
-                ReelRightSpeed();
             }
         }
 
@@ -209,17 +200,5 @@ public class Swinging : MonoBehaviour
     void ReelRightSpeed()
     {
         rb.AddForce(player.right * (0.3f * sideThrust), ForceMode.Acceleration);
-    }
-    
-     void GrappleReel()
-    {
-        float g = Mathf.Abs(Physics.gravity.y);
-        float hardMin = joint.minDistance + 0.01f;
-        Vector3 toAnchor = (swingPoint - player.position).normalized;
-        rb.AddForce(Vector3.up * (g * (1f - 0.5f)), ForceMode.Acceleration); // counteract gravity partially
-
-        rb.AddForce(toAnchor * reelStrength, ForceMode.Acceleration);
-        joint.maxDistance = Mathf.Max(hardMin, joint.maxDistance - reelRate * Time.fixedDeltaTime);
-
     }
 }
