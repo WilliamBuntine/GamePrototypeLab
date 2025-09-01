@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class Swinging : MonoBehaviour
 {
-    
+
     private PlayerMove playermove;
     private Rigidbody rb;
     [Header("Input")]
@@ -25,12 +25,13 @@ public class Swinging : MonoBehaviour
 
 
     [Header("Swinging")]
-    public float jointSpring = 2f;   
-    public float jointDamper = 0.5f;  
-    public float jointMassScale = 1f; 
+    public float jointSpring = 2f;
+    public float jointDamper = 0.5f;
+    public float jointMassScale = 1f;
     private float maxSwingDistance = 25f;
     private Vector3 swingPoint;
     private SpringJoint joint;
+    public float maxSpeed;
 
     [Header("Thrust")]
     public float sideThrust;
@@ -45,7 +46,7 @@ public class Swinging : MonoBehaviour
     }
 
     // Update is called once per frame
-    
+
     bool wHeld, aHeld, sHeld, dHeld;
     void Update()
     {
@@ -54,12 +55,12 @@ public class Swinging : MonoBehaviour
             StartSwing();
             playerController.grappling = true;
         }
-       wHeld = Input.GetKey(KeyCode.W);
-       aHeld = Input.GetKey(KeyCode.A);
-       sHeld = Input.GetKey(KeyCode.S);
-       dHeld = Input.GetKey(KeyCode.D);
-        
-       
+        wHeld = Input.GetKey(KeyCode.W);
+        aHeld = Input.GetKey(KeyCode.A);
+        sHeld = Input.GetKey(KeyCode.S);
+        dHeld = Input.GetKey(KeyCode.D);
+
+
         if (Input.GetKeyUp(swingKey))
         {
             StopSwing();
@@ -100,28 +101,24 @@ public class Swinging : MonoBehaviour
         {
             if (wHeld)
             {
+                ReelUp();
 
-                rb.AddForce(player.up * sideThrust, ForceMode.Acceleration);
-                isSwinging = true;
             }
             if (aHeld)
             {
-                rb.AddForce(-player.right * sideThrust, ForceMode.Acceleration);
-                isSwinging = true;
+                ReelLeft();
 
             }
             if (sHeld)
             {
-                rb.AddForce(-player.up * sideThrust, ForceMode.Acceleration);
-                isSwinging = true;
+                ReelDown();
             }
             if (dHeld)
             {
-                rb.AddForce(player.right * sideThrust, ForceMode.Acceleration);
-                isSwinging = true;
+                ReelRight();
             }
         }
-        
+
     }
 
     void StartSwing()
@@ -163,5 +160,35 @@ public class Swinging : MonoBehaviour
 
         lr.SetPosition(0, gunTip.position);
         lr.SetPosition(1, swingPoint);
+    }
+
+    void ReelUp()
+    {
+        rb.AddForce(player.up * sideThrust, ForceMode.Acceleration);
+        isSwinging = true;
+    }
+
+    void ReelDown()
+    {
+        rb.AddForce(-player.up * sideThrust, ForceMode.Acceleration);
+        isSwinging = true;
+    }
+
+    void ReelLeft()
+    {
+        rb.AddForce(-player.right * sideThrust, ForceMode.Acceleration);
+        isSwinging = true;
+    }
+
+    void ReelLeftSpeed()
+    {
+        rb.AddForce(-player.right * (0.3f * sideThrust), ForceMode.Acceleration);
+        isSwinging = true;
+    }
+
+    void ReelRight()
+    {
+        rb.AddForce(player.right * sideThrust, ForceMode.Acceleration);
+        isSwinging = true;
     }
 }
