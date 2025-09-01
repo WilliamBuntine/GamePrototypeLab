@@ -158,6 +158,7 @@ public class Swinging : MonoBehaviour
 
             lr.positionCount = 2;
             currentGrapplePosition = gunTip.position;
+            isSwinging = true;
         }
     }
 
@@ -165,7 +166,7 @@ public class Swinging : MonoBehaviour
     {
         lr.positionCount = 0;
         Destroy(joint);
-
+        isSwinging = false;
     }
 
     void DrawRope()
@@ -193,25 +194,21 @@ public class Swinging : MonoBehaviour
     void ReelLeft()
     {
         rb.AddForce(-player.right * sideThrust, ForceMode.Acceleration);
-        isSwinging = true;
     }
 
     void ReelLeftSpeed()
     {
         rb.AddForce(-player.right * (0.3f * sideThrust), ForceMode.Acceleration);
-        isSwinging = true;
     }
 
     void ReelRight()
     {
         rb.AddForce(player.right * sideThrust, ForceMode.Acceleration);
-        isSwinging = true;
     }
 
     void ReelRightSpeed()
     {
         rb.AddForce(player.right * (0.3f * sideThrust), ForceMode.Acceleration);
-        isSwinging = true;
     }
     
      void GrappleReel()
