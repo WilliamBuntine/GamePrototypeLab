@@ -95,6 +95,10 @@ public class Swinging : MonoBehaviour
         float targetMax = Mathf.Max(shortestDistance + adaptiveLeeway, hardMin);
 
         joint.maxDistance = targetMax;
+        Vector3 vAll = rb.linearVelocity;
+        Vector3 vHoriz   = new Vector3(vAll.x, 0f, vAll.z);
+
+
 
         // Advanced rope mechanics
         if (!playermove.grounded)
@@ -104,18 +108,26 @@ public class Swinging : MonoBehaviour
                 ReelUp();
 
             }
-            if (aHeld)
+            if (aHeld && vHoriz.magnitude < maxSpeed)
             {
                 ReelLeft();
-
             }
+            else if (aHeld && vHoriz.magnitude > maxSpeed)
+            {
+                ReelLeftSpeed();
+            }
+
             if (sHeld)
             {
                 ReelDown();
             }
-            if (dHeld)
+            if (dHeld && vHoriz.magnitude < maxSpeed)
             {
                 ReelRight();
+            }
+            else if (dHeld && vHoriz.magnitude > maxSpeed)
+            {
+                ReelRightSpeed();
             }
         }
 
@@ -189,6 +201,12 @@ public class Swinging : MonoBehaviour
     void ReelRight()
     {
         rb.AddForce(player.right * sideThrust, ForceMode.Acceleration);
+        isSwinging = true;
+    }
+
+    void ReelRightSpeed()
+    {
+        rb.AddForce(player.right * (0.3f * sideThrust), ForceMode.Acceleration);
         isSwinging = true;
     }
 }
