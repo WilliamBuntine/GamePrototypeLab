@@ -6525,7 +6525,7 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 4294967295
-  slideFrictionAdjustment: 0.2
+  slideFrictionAdjustment: 0
   slideDuration: 1
   slideHeight: 0.5
   slideKey: 306

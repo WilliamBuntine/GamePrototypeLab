@@ -191,11 +191,16 @@ public class PlayerMove : MonoBehaviour
 
     void Jump(Vector3 direction)
     {
-        rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
-        rb.AddForce(direction * jumpForce, ForceMode.Impulse);
+        // Preserve current horizontal velocity
+        Vector3 horizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
 
-        if (isSliding) StopSlide(); // jump cancels slide
+        // Set the Rigidbody velocity to current horizontal + jump vertical
+        rb.linearVelocity = horizontalVel + direction * jumpForce;
+
+        // Stop slide if jumping out of it
+        // if (isSliding) StopSlide();
     }
+
 
     void WallJump()
     {
