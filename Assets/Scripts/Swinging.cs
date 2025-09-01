@@ -32,6 +32,7 @@ public class Swinging : MonoBehaviour
     private Vector3 swingPoint;
     private SpringJoint joint;
     public float maxSpeed;
+    public float reelStrength, reelRate;
 
     [Header("Thrust")]
     public float sideThrust;
@@ -47,7 +48,7 @@ public class Swinging : MonoBehaviour
 
     // Update is called once per frame
 
-    bool wHeld, aHeld, sHeld, dHeld;
+    bool wHeld, aHeld, sHeld, dHeld, spaceheld;
     void Update()
     {
         if (Input.GetKeyDown(swingKey))
@@ -59,7 +60,7 @@ public class Swinging : MonoBehaviour
         aHeld = Input.GetKey(KeyCode.A);
         sHeld = Input.GetKey(KeyCode.S);
         dHeld = Input.GetKey(KeyCode.D);
-
+        spaceheld = Input.GetKey(KeyCode.Space);
 
         if (Input.GetKeyUp(swingKey))
         {
@@ -75,7 +76,10 @@ public class Swinging : MonoBehaviour
     }
     void FixedUpdate()
     {
-
+        if (spaceheld && isSwinging)
+        {
+            GrappleReel();
+        }
 
         if (joint == null) return;
 
@@ -96,7 +100,7 @@ public class Swinging : MonoBehaviour
 
         joint.maxDistance = targetMax;
         Vector3 vAll = rb.linearVelocity;
-        Vector3 vHoriz   = new Vector3(vAll.x, 0f, vAll.z);
+        Vector3 vHoriz = new Vector3(vAll.x, 0f, vAll.z);
 
 
 
@@ -208,5 +212,17 @@ public class Swinging : MonoBehaviour
     {
         rb.AddForce(player.right * (0.3f * sideThrust), ForceMode.Acceleration);
         isSwinging = true;
+    }
+    
+     void GrappleReel()
+    {
+        float g = Mathf.Abs(Physics.gravity.y);
+        float hardMin = joint.minDistance + 0.01f;
+        Vector3 toAnchor = (swingPoint - player.position).normalized;
+        rb.AddForce(Vector3.up * (g * (1f - 0.5f)), ForceMode.Acceleration); // counteract gravity partially
+
+        rb.AddForce(toAnchor * reelStrength, ForceMode.Acceleration);
+        joint.maxDistance = Mathf.Max(hardMin, joint.maxDistance - reelRate * Time.fixedDeltaTime);
+
     }
 }

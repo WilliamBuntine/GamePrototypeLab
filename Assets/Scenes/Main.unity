@@ -4071,6 +4071,9 @@ MonoBehaviour:
   jointSpring: 2
   jointDamper: 0.5
   jointMassScale: 1
+  maxSpeed: 0
+  reelStrength: 10
+  reelRate: 15
   sideThrust: 4
   upThrust: 2.5
   isSwinging: 0
@@ -4096,11 +4099,16 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 4294967295
+  slideFrictionAdjustment: 0.2
+  slideDuration: 1
+  slideHeight: 0.5
+  slideKey: 306
   wallDetector: {fileID: 1477448929}
   wallPushAwayForce: 1.5
   wallPushUpForce: 1
   mouseSensitivity: 2000
   playerCamera: {fileID: 1289486707}
+  cameraSlideHeightAdjust: -0.5
 --- !u!136 &1416208305
 CapsuleCollider:
   m_ObjectHideFlags: 0
