@@ -28,6 +28,7 @@ public class PlayerMove : MonoBehaviour
     public WallDetector wallDetector;
     public float wallPushAwayForce = 5f;
     public float wallPushUpForce = 3f;
+    public bool wallRunningEnabled;
 
     [Header("Look Settings")]
     public float mouseSensitivity = 100f;
@@ -130,7 +131,7 @@ public class PlayerMove : MonoBehaviour
 
         if (inputDir.sqrMagnitude > 0.01f)
         {
-            if (grounded || (grappling && wallDetector != null && wallDetector.nearWall))
+            if (grounded || (grappling && wallDetector != null && wallDetector.nearWall && wallRunningEnabled))
             {
                 Vector3 desiredVel = inputDir * targetSpeed;
                 Vector3 forceDir = (desiredVel - new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z)) * 10f;

@@ -6502,14 +6502,6 @@ MonoBehaviour:
   Grappleable:
     serializedVersion: 2
     m_Bits: 4294967295
-  jointSpring: 2
-  jointDamper: 0.5
-  jointMassScale: 1
-  maxSpeed: 0
-  reelStrength: 10
-  reelRate: 15
-  sideThrust: 4
-  upThrust: 2.5
   isSwinging: 0
 --- !u!114 &1416208303
 MonoBehaviour:
@@ -6528,7 +6520,7 @@ MonoBehaviour:
   sprintSpeed: 10
   jumpForce: 10
   groundFriction: 12
-  airControl: 0.1
+  airControl: 0.5
   groundCheckDistance: 1.5
   groundMask:
     serializedVersion: 2
@@ -6538,8 +6530,9 @@ MonoBehaviour:
   slideHeight: 0.5
   slideKey: 306
   wallDetector: {fileID: 1477448929}
-  wallPushAwayForce: 1.5
+  wallPushAwayForce: 1.3
   wallPushUpForce: 1
+  wallRunningEnabled: 0
   mouseSensitivity: 2000
   playerCamera: {fileID: 1289486707}
   cameraSlideHeightAdjust: -0.5
