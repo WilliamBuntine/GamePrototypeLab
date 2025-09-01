@@ -31,6 +31,7 @@ public class Swinging : MonoBehaviour
     private float maxSwingDistance = 25f;
     private Vector3 swingPoint;
     private SpringJoint joint;
+    private float maxSwingSpeed = 5f;
 
     [Header("Thrust")]
     public float sideThrust;
@@ -129,17 +130,18 @@ public class Swinging : MonoBehaviour
             {
                 Vector3 tangentCCW = Vector3.Cross(Vector3.up, rHoriz).normalized;
                 Vector3 tangentCW = -tangentCCW;
-                if (aHeld)
+                if (aHeld && rb.linearVelocity.magnitude < maxSwingSpeed)
                 {
                     ReelRight();
                     
-
                 }
-                if (dHeld)
+                
+                if (dHeld && rb.linearVelocity.magnitude < maxSwingSpeed)
                 {
                     ReelLeft();
                     
                 }
+                
             }
         }
         
