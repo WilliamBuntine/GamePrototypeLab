@@ -205,9 +205,14 @@ public class PlayerMove : MonoBehaviour
     void WallJump()
     {
         if (wallDetector == null || wallDetector.wallNormal == Vector3.zero) return;
-
+        Vector3 HorizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+        float HorizSpeed = HorizontalVel.magnitude;
+    
         Vector3 jumpDir = wallDetector.wallNormal * wallPushAwayForce + Vector3.up * wallPushUpForce;
         Jump(jumpDir);
+        
+       
+        
     }
 
     void GroundCheck()

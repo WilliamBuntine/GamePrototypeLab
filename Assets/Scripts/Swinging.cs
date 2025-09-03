@@ -3,9 +3,9 @@ using UnityEngine;
 
 public class Swinging : MonoBehaviour
 {
+
     private PlayerMove playermove;
     private Rigidbody rb;
-
     [Header("Input")]
     public KeyCode swingKey = KeyCode.Mouse0;
 
@@ -16,19 +16,39 @@ public class Swinging : MonoBehaviour
     public LayerMask Grappleable;
     private Vector3 currentGrapplePosition;
 
+    //Advanced rope mechanics
+    private float shortestDistance;
+    private float minLeeway = 0.2f;
+    private float leewayFraction = 0.05f;
+    private float adaptiveLeeway;
+
+
+
     [Header("Swinging")]
-    private float maxSwingDistance = 25f;
+    public float jointSpring = 2f;
+    public float jointDamper = 0.5f;
+    public float jointMassScale = 1f;
+    public float maxSwingDistance = 25f;
     private Vector3 swingPoint;
     private SpringJoint joint;
-    private float shortestDistance;
+    public float maxSpeed;
+    public float reelStrength, reelRate;
+
+    [Header("Thrust")]
+    public float sideThrust;
+    public float upThrust;
     public bool isSwinging = false;
 
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         playermove = GetComponent<PlayerMove>();
         rb = GetComponent<Rigidbody>();
     }
 
+    // Update is called once per frame
+
+    bool wHeld, aHeld, sHeld, dHeld, spaceheld;
     void Update()
     {
         if (Input.GetKeyDown(swingKey))
@@ -36,21 +56,31 @@ public class Swinging : MonoBehaviour
             StartSwing();
             playerController.grappling = true;
         }
+        wHeld = Input.GetKey(KeyCode.W);
+        aHeld = Input.GetKey(KeyCode.A);
+        sHeld = Input.GetKey(KeyCode.S);
+        dHeld = Input.GetKey(KeyCode.D);
+        spaceheld = Input.GetKey(KeyCode.Space);
 
         if (Input.GetKeyUp(swingKey))
         {
             StopSwing();
             playerController.grappling = false;
         }
+
     }
 
     void LateUpdate()
     {
         DrawRope();
     }
-
     void FixedUpdate()
     {
+        if (spaceheld && isSwinging)
+        {
+            GrappleReel();
+        }
+
         if (joint == null) return;
 
         float currentDist = Vector3.Distance(player.position, swingPoint);
@@ -59,12 +89,53 @@ public class Swinging : MonoBehaviour
         if (currentDist < shortestDistance)
             shortestDistance = currentDist;
 
-        // Adaptive slack (optional, keeps rope from overstretching)
-        float minLeeway = 0.2f;
-        float leewayFraction = 0.05f;
+        // Adaptive leeway: scales with how close you've reeled in
         float adaptiveLeeway = Mathf.Max(minLeeway, shortestDistance * leewayFraction);
+
+        // Hard minimum for maxDistance so it's always >= minDistance
         float hardMin = joint.minDistance + 0.01f;
-        joint.maxDistance = Mathf.Max(shortestDistance + adaptiveLeeway, hardMin);
+
+        // New cap: closest-ever + adaptive slack
+        float targetMax = Mathf.Max(shortestDistance + adaptiveLeeway, hardMin);
+
+        joint.maxDistance = targetMax;
+        Vector3 vAll = rb.linearVelocity;
+        Vector3 vHoriz = new Vector3(vAll.x, 0f, vAll.z);
+
+
+
+        // Advanced rope mechanics
+        if (!playermove.grounded)
+        {
+            if (wHeld)
+            {
+                ReelUp();
+
+            }
+            if (aHeld && vHoriz.magnitude < maxSpeed)
+            {
+                ReelLeft();
+            }
+            else if (aHeld && vHoriz.magnitude > maxSpeed)
+            {
+                ReelLeftSpeed();
+            }
+
+            if (sHeld)
+            {
+                ReelDown();
+            }
+            
+            if (dHeld && vHoriz.magnitude < maxSpeed)
+            {
+                ReelRight();
+            }
+            else if (dHeld && vHoriz.magnitude > maxSpeed)
+            {
+                ReelRightSpeed();
+            }
+        }
+
     }
 
     void StartSwing()
@@ -79,7 +150,7 @@ public class Swinging : MonoBehaviour
 
             float distanceFromPoint = Vector3.Distance(player.position, swingPoint);
             shortestDistance = distanceFromPoint;
-            joint.maxDistance = shortestDistance;
+            joint.maxDistance = shortestDistance; ;
             joint.minDistance = shortestDistance * 0.25f;
 
             joint.spring = 80f;
@@ -104,7 +175,52 @@ public class Swinging : MonoBehaviour
         if (!joint) return;
 
         currentGrapplePosition = Vector3.Lerp(currentGrapplePosition, swingPoint, Time.deltaTime * 8f);
+
         lr.SetPosition(0, gunTip.position);
         lr.SetPosition(1, swingPoint);
+    }
+
+    void ReelUp()
+    {
+        rb.AddForce(player.up * upThrust, ForceMode.Acceleration);
+        isSwinging = true;
+    }
+
+    void ReelDown()
+    {
+        rb.AddForce(-player.up * (0.5f * upThrust), ForceMode.Acceleration);
+        isSwinging = true;
+    }
+
+    void ReelLeft()
+    {
+        rb.AddForce(-player.right * sideThrust, ForceMode.Acceleration);
+    }
+
+    void ReelLeftSpeed()
+    {
+        rb.AddForce(-player.right * (0.3f * sideThrust), ForceMode.Acceleration);
+    }
+
+    void ReelRight()
+    {
+        rb.AddForce(player.right * sideThrust, ForceMode.Acceleration);
+    }
+
+    void ReelRightSpeed()
+    {
+        rb.AddForce(player.right * (0.3f * sideThrust), ForceMode.Acceleration);
+    }
+    
+     void GrappleReel()
+    {
+        float g = Mathf.Abs(Physics.gravity.y);
+        float hardMin = joint.minDistance + 0.01f;
+        Vector3 toAnchor = (swingPoint - player.position).normalized;
+        rb.AddForce(Vector3.up * (g * (1f - 0.5f)), ForceMode.Acceleration); // counteract gravity partially
+
+        rb.AddForce(toAnchor * reelStrength, ForceMode.Acceleration);
+        joint.maxDistance = Mathf.Max(hardMin, joint.maxDistance - reelRate * Time.fixedDeltaTime);
+
     }
 }
