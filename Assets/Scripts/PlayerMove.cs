@@ -69,7 +69,9 @@ public class PlayerMove : MonoBehaviour
         slideRefresh -= Time.deltaTime;
 
         Vector3 horizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
-        if (horizontalVel.magnitude > 15f){
+        float SpeedHoriz = horizontalVel.magnitude;
+        if (SpeedHoriz > 15f)
+        {
             SpeedSound();
         }
 
@@ -229,7 +231,6 @@ public class PlayerMove : MonoBehaviour
 
     void SpeedSound()
     {
-        audioSource.clip = speedSound;
-        audioSource.Play();
+        audioSource.PlayOneShot(speedSound);
     }
 }
