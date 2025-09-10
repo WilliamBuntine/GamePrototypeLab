@@ -46,6 +46,9 @@ public class PlayerMove : MonoBehaviour
     private Vector3 originalColliderCenter;
     private Vector3 originalCameraLocalPos;
 
+    public AudioSource audioSource; // Audio source for playing sounds
+    public AudioClip speedSound; // Sound to play when at high speed
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -63,8 +66,12 @@ public class PlayerMove : MonoBehaviour
     {
         HandleLook();
         GroundCheck();
-
         slideRefresh -= Time.deltaTime;
+
+        Vector3 horizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+        if (horizontalVel.magnitude > 15f){
+            SpeedSound();
+        }
 
 
         // start slide
@@ -207,16 +214,22 @@ public class PlayerMove : MonoBehaviour
         if (wallDetector == null || wallDetector.wallNormal == Vector3.zero) return;
         Vector3 HorizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
         float HorizSpeed = HorizontalVel.magnitude;
-    
+
         Vector3 jumpDir = wallDetector.wallNormal * wallPushAwayForce + Vector3.up * wallPushUpForce;
         Jump(jumpDir);
-        
-       
-        
+
+
+
     }
 
     void GroundCheck()
     {
         grounded = Physics.Raycast(transform.position, Vector3.down, groundCheckDistance, groundMask);
+    }
+
+    void SpeedSound()
+    {
+        audioSource.clip = speedSound;
+        audioSource.Play();
     }
 }

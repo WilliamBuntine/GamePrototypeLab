@@ -17,16 +17,19 @@ public class GrappleBoost : MonoBehaviour
     [Header("Grapple Settings")]
     public float maxGrappleDistance = 40f;
     public float grappleBoostStrength = 30f;
-    public float ropePullDuration = 0.2f; 
+    public float ropePullDuration = 0.2f;
 
     [Header("Cooldown")]
-    public float grappleCooldown = 2f; 
+    public float grappleCooldown = 2f;
     private float cooldownTimer;
 
     private Vector3 grapplePoint;
     private Vector3 currentGrapplePosition;
     private bool isGrappling;
     private float grappleTimer;
+
+    public AudioSource audioSource; // Audio source for playing sounds
+    public AudioClip grappleSound; // Sound to play when grappling
 
     void Start()
     {
@@ -79,6 +82,10 @@ public class GrappleBoost : MonoBehaviour
         RaycastHit hit;
         if (Physics.Raycast(cam.position, cam.forward, out hit, maxGrappleDistance, grappleable))
         {
+            // Play grapple sound
+            PlayGrappleReelSound();
+            audioSource.clip = grappleSound;
+            audioSource.Play();
             grapplePoint = hit.point;
             currentGrapplePosition = gunTip.position;
             isGrappling = true;
@@ -102,5 +109,11 @@ public class GrappleBoost : MonoBehaviour
         currentGrapplePosition = Vector3.Lerp(currentGrapplePosition, grapplePoint, Time.deltaTime * 10f);
         lr.SetPosition(0, gunTip.position);
         lr.SetPosition(1, currentGrapplePosition);
+    }
+    
+    void PlayGrappleReelSound()
+    {
+        audioSource.clip = grappleSound;
+        audioSource.Play();
     }
 }
