@@ -35,6 +35,11 @@ public class PlayerMove : MonoBehaviour
     public Transform playerCamera;
     public float cameraSlideHeightAdjust = -0.5f;
 
+    [Header("Sound Settings")]
+    public AudioSource audioSource; // Audio source for playing sounds
+    public AudioClip speedSound; // Sound to play when at high speed
+    private bool speedBreached;
+
     private Rigidbody rb;
     private CapsuleCollider capsule;
     private float xRotation = 0f;
@@ -46,9 +51,8 @@ public class PlayerMove : MonoBehaviour
     private Vector3 originalColliderCenter;
     private Vector3 originalCameraLocalPos;
 
-    public AudioSource audioSource; // Audio source for playing sounds
-    public AudioClip speedSound; // Sound to play when at high speed
 
+    
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -70,9 +74,15 @@ public class PlayerMove : MonoBehaviour
 
         Vector3 horizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
         float SpeedHoriz = horizontalVel.magnitude;
-        if (SpeedHoriz > 15f)
+
+        if (SpeedHoriz > 30f && !speedBreached)
         {
             SpeedSound();
+            speedBreached = true;
+        }
+        else
+        {
+            speedBreached = false;
         }
 
 
