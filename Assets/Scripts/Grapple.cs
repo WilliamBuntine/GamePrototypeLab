@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
@@ -15,12 +16,12 @@ public class GrappleBoost : MonoBehaviour
     public LayerMask grappleable;
 
     [Header("Grapple Settings")]
-    public float maxGrappleDistance = 40f;
-    public float grappleBoostStrength = 30f;
+    public float maxGrappleDistance = 80f;
+    public float grappleBoostStrength = 5f;
     public float ropePullDuration = 0.2f;
 
     [Header("Cooldown")]
-    public float grappleCooldown = 2f;
+    public float grappleCooldown = 0.1f;
     private float cooldownTimer;
 
     private Vector3 grapplePoint;
@@ -64,14 +65,21 @@ public class GrappleBoost : MonoBehaviour
         if (!isGrappling) return;
 
         grappleTimer += Time.fixedDeltaTime;
+        if (grappleTimer > 1f) { grappleTimer = 1f; }
 
-        if (grappleTimer < ropePullDuration)
-        {
-            // Apply force toward grapple point
+        //if (grappleTimer < ropePullDuration)
+        //{
+            // Apply force toward grapple point (edit: multiplied by how long the grapple is active)
             Vector3 dir = (grapplePoint - transform.position).normalized;
-            rb.AddForce(dir * grappleBoostStrength, ForceMode.VelocityChange);
-        }
-        else
+            rb.AddForce((0.5f + grappleTimer) * grappleBoostStrength * dir, ForceMode.VelocityChange);
+        //}
+        //else
+        //{
+            //StopGrapple();
+        //}
+
+        //stop grapple when player is too close to grapple point
+        if (Vector3.Distance(grapplePoint, gunTip.position) < 3f)
         {
             StopGrapple();
         }
