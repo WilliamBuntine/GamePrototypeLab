@@ -2,22 +2,23 @@ using UnityEngine;
 
 public class Course : MonoBehaviour
 {
-
     public Checkpoint[] pointList;
+    public CourseUI ui;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-       foreach (Checkpoint point in pointList)
+        foreach (Checkpoint point in pointList)
         {
             if (point != null)
                 point.parentCourse = this;
-        } 
+        }
+
+        if (ui != null)
+            ui.GenerateUI(pointList.Length);
     }
 
-
-    public void CheckpointReached(Checkpoint point)
+    public void UpdateList()
     {
-
+        ui?.FillNextCheckpoint();
     }
 }

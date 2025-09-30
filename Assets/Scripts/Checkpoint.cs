@@ -28,7 +28,7 @@ public class Checkpoint : MonoBehaviour
             // Add logic for what happens when the player enters the death zone
             rend.material.color = completeColor;
             isComplete = true;
-            parentCourse.CheckpointReached(this);
+            parentCourse.UpdateList();
         }
     }
 }
