@@ -5,7 +5,7 @@ public class Course : MonoBehaviour
     public Checkpoint[] pointList;
     public CourseUI ui;
 
-    void Start()
+    public void CreateList()
     {
         foreach (Checkpoint point in pointList)
         {

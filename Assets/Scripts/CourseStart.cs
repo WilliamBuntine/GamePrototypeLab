@@ -22,6 +22,7 @@ public class CourseStart : MonoBehaviour
         course.ui = ui;
 
         SetCourseActive(true);
+        course.CreateList();
         Debug.Log("I set course active....");
 
         Debug.Log($"Course '{course.name}' started");
