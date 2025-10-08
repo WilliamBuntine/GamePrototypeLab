@@ -52,7 +52,7 @@ public class PlayerMove : MonoBehaviour
     private Vector3 originalCameraLocalPos;
 
 
-    
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -243,4 +243,13 @@ public class PlayerMove : MonoBehaviour
     {
         audioSource.PlayOneShot(speedSound);
     }
+
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("P1"))
+        {
+            
+        }
+    }
 }
+
