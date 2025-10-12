@@ -6,7 +6,7 @@ public class CourseStart : MonoBehaviour
     public Course course;
     public CourseUI ui;
 
-    public Timer timer;
+    public PlayerMove player;
 
     private void Start()
     {
@@ -22,12 +22,11 @@ public class CourseStart : MonoBehaviour
         }
 
         course.ui = ui;
+        ui.Start();
 
         SetCourseActive(true);
         course.CreateList();
         Debug.Log("I set course active....");
-
-        timer.StartTimer();
 
         Debug.Log($"Course '{course.name}' started");
     }

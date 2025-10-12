@@ -3,6 +3,9 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody), typeof(CapsuleCollider))]
 public class PlayerMove : MonoBehaviour
 {
+
+    public Course activeCourse;
+
     [Header("Movement Settings")]
     public bool grappling = false;
     public float walkSpeed = 7f;

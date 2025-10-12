@@ -7,12 +7,7 @@ public class Timer : MonoBehaviour
     public bool isRunning = false;
     public Course course;
     public Scoreboard scoreboard;
-    private TMP_Text timerText;
-
-    void Start()
-    {
-        timerText = GetComponent<TMP_Text>();
-    }
+    public TMP_Text timerText;
 
     void Update()
     {
@@ -53,6 +48,6 @@ public class Timer : MonoBehaviour
 
     public void SendTime(float time, Course course)
     {
-        scoreboard.PostTime(time, course);
+        scoreboard.UpdateScore(course.courseName, time);
     }
 }

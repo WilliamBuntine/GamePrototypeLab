@@ -10,7 +10,7 @@ public class CourseUI : MonoBehaviour
     private Image[] checkpointImages;
     private int filledCount = 0;
 
-    void Start()
+    public void Start()
     {
         if (activeCourse != null)
         {

@@ -2,33 +2,40 @@ using UnityEngine;
 
 public class Checkpoint : MonoBehaviour
 {
-
-    public Color completeColor = Color.blue;   // The color you want it to change to
+    public Color completeColor = Color.blue;
     private Renderer rend;
-    private Color originalColor;
+    private Color originalColor = Color.red;
 
     public Course parentCourse;
+    public bool isComplete = false;
 
-    private bool isComplete = false;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    void Awake()
     {
         rend = GetComponent<Renderer>();
+    }
+
+    void Start()
+    {
+        if (rend != null)
+            rend.material.color = originalColor;
+    }
+
+    public void Refresh()
+    {
         if (rend != null)
         {
-            originalColor = rend.material.color;
+            rend.material.color = originalColor;
+            isComplete = false;
         }
     }
 
     void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player"))
+        if (other.CompareTag("Player") && !isComplete)
         {
             Debug.Log("Checkpoint reached.");
-            // Add logic for what happens when the player enters the death zone
             rend.material.color = completeColor;
-            if (!isComplete)
-            { parentCourse.UpdateList(); }
+            parentCourse?.UpdateList();
             isComplete = true;
         }
     }
