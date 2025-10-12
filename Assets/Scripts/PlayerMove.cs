@@ -3,7 +3,9 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody), typeof(CapsuleCollider))]
 public class PlayerMove : MonoBehaviour
 {
-    private Swinging swinging;
+
+    public Course activeCourse;
+
     [Header("Movement Settings")]
     public bool grappling = false;
     public float walkSpeed = 7f;
@@ -29,17 +31,17 @@ public class PlayerMove : MonoBehaviour
     public WallDetector wallDetector;
     public float wallPushAwayForce = 5f;
     public float wallPushUpForce = 3f;
-
-    public float walljumpmultiplier;
-
-    public float wallJumpCooldown;
-    private float wallJumpTimer = 0f;
-    private bool hasWallJumped;
+    public bool wallRunningEnabled;
 
     [Header("Look Settings")]
     public float mouseSensitivity = 100f;
     public Transform playerCamera;
     public float cameraSlideHeightAdjust = -0.5f;
+
+    [Header("Sound Settings")]
+    public AudioSource audioSource; // Audio source for playing sounds
+    public AudioClip speedSound; // Sound to play when at high speed
+    private bool speedBreached;
 
     private Rigidbody rb;
     private CapsuleCollider capsule;
@@ -52,6 +54,8 @@ public class PlayerMove : MonoBehaviour
     private Vector3 originalColliderCenter;
     private Vector3 originalCameraLocalPos;
 
+
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -63,29 +67,25 @@ public class PlayerMove : MonoBehaviour
         originalCameraLocalPos = playerCamera.localPosition;
 
         Cursor.lockState = CursorLockMode.Locked;
-        swinging = GetComponent<Swinging>();
-
     }
 
-    bool spaceHeld;
     void Update()
     {
-        spaceHeld = Input.GetKey(KeyCode.Space);
-
         HandleLook();
         GroundCheck();
-
         slideRefresh -= Time.deltaTime;
 
-        if(hasWallJumped)
+        Vector3 horizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+        float SpeedHoriz = horizontalVel.magnitude;
+
+        if (SpeedHoriz > 30f && !speedBreached)
         {
-            wallJumpTimer -= Time.deltaTime;
-            if(wallJumpTimer <= 0f)
-            {
-                print("reset wall jump cooldown");
-                hasWallJumped = false;
-                wallJumpTimer = wallJumpCooldown;
-            }
+            SpeedSound();
+            speedBreached = true;
+        }
+        else
+        {
+            speedBreached = false;
         }
 
 
@@ -112,16 +112,14 @@ public class PlayerMove : MonoBehaviour
 
         if (Input.GetButtonDown("Jump"))
         {
-            if (grounded && !swinging.isSwinging)
+            if (grounded)
             {
                 Jump(Vector3.up);
             }
-            else if (wallDetector != null && wallDetector.nearWall && !hasWallJumped && !grappling)
+            else if (wallDetector != null && wallDetector.nearWall)
             {
                 WallJump();
-
             }
-            
         }
     }
 
@@ -155,7 +153,7 @@ public class PlayerMove : MonoBehaviour
 
         if (inputDir.sqrMagnitude > 0.01f)
         {
-            if (grounded || (grappling && wallDetector != null && wallDetector.nearWall))
+            if (grounded || (grappling && wallDetector != null && wallDetector.nearWall && wallRunningEnabled))
             {
                 Vector3 desiredVel = inputDir * targetSpeed;
                 Vector3 forceDir = (desiredVel - new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z)) * 10f;
@@ -215,33 +213,46 @@ public class PlayerMove : MonoBehaviour
 
     void Jump(Vector3 direction)
     {
-        rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
-        rb.AddForce(direction * jumpForce, ForceMode.Impulse);
+        // Preserve current horizontal velocity
+        Vector3 horizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
 
-        if (isSliding) StopSlide(); // jump cancels slide
+        // Set the Rigidbody velocity to current horizontal + jump vertical
+        rb.linearVelocity = horizontalVel + direction * jumpForce;
+
+        // Stop slide if jumping out of it
+        // if (isSliding) StopSlide();
     }
+
 
     void WallJump()
     {
-        hasWallJumped = true;
-        wallJumpTimer = wallJumpCooldown;
-        Vector3 horizontalVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
-        float speed = horizontalVelocity.magnitude;
         if (wallDetector == null || wallDetector.wallNormal == Vector3.zero) return;
-        if (speed <= 5f)
-        {
-            Vector3 jumpDir = wallDetector.wallNormal * wallPushAwayForce + Vector3.up * wallPushUpForce;
-            Jump(jumpDir);
-        }
-        else if (speed > 5f)
-        {
-            Vector3 jumpDir = wallDetector.wallNormal * (speed * walljumpmultiplier) + Vector3.up * wallPushUpForce;
-            Jump(jumpDir);
-        }
+        Vector3 HorizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+        float HorizSpeed = HorizontalVel.magnitude;
+
+        Vector3 jumpDir = wallDetector.wallNormal * wallPushAwayForce + Vector3.up * wallPushUpForce;
+        Jump(jumpDir);
+
+
+
     }
 
     void GroundCheck()
     {
         grounded = Physics.Raycast(transform.position, Vector3.down, groundCheckDistance, groundMask);
     }
+
+    void SpeedSound()
+    {
+        audioSource.PlayOneShot(speedSound);
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("P1"))
+        {
+            
+        }
+    }
 }
+
