@@ -8,16 +8,16 @@ public class PlayerMove : MonoBehaviour
 
     [Header("Movement Settings")]
     public bool grappling = false;
-    public float walkSpeed = 7f;
-    public float sprintSpeed = 12f;
-    public float jumpForce = 7f;
-    public float groundFriction = 12f;
-    public float airControl = 0.5f;
-    public float groundCheckDistance = 0.5f;
+    public float walkSpeed;
+    public float sprintSpeed;
+    public float jumpForce;
+    public float groundFriction;
+    public float airControl;
+    public float groundCheckDistance;
     public LayerMask groundMask;
 
     [Header("Slide Settings")]
-    public float slideFrictionAdjustment = 0.2f;
+    public float slideFrictionAdjustment;
     public float slideDuration = 1f;
     public float slideHeight = 0.5f;       // how short the collider gets while sliding
     public KeyCode slideKey = KeyCode.LeftControl;
@@ -108,7 +108,15 @@ public class PlayerMove : MonoBehaviour
         // Collect input here (for FixedUpdate use)
         float moveX = Input.GetAxisRaw("Horizontal");
         float moveZ = Input.GetAxisRaw("Vertical");
+        
         inputDir = (transform.right * moveX + transform.forward * moveZ).normalized;
+       
+        float HorizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z).magnitude;
+        if (HorizontalVel > sprintSpeed)
+        {
+            sprintSpeed *= 0.3f;
+            walkSpeed *= 0.3f;
+        }
 
         if (Input.GetButtonDown("Jump"))
         {
