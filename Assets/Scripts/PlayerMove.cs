@@ -117,7 +117,7 @@ public class PlayerMove : MonoBehaviour
         {
             currentSpeed *= 0.3f;
         }
-        else { currentSpeed = walkSpeed; }
+        else { currentSpeed = walkSpeed; }      //Regon: I tried fixing ts, air acceleration is cooked
 
         if (Input.GetButtonDown("Jump"))
         {
