@@ -9,6 +9,7 @@ public class PlayerMove : MonoBehaviour
     [Header("Movement Settings")]
     public bool grappling = false;
     public float walkSpeed;
+    float currentSpeed;
     public float sprintSpeed;
     public float jumpForce;
     public float groundFriction;
@@ -110,13 +111,13 @@ public class PlayerMove : MonoBehaviour
         float moveZ = Input.GetAxisRaw("Vertical");
         
         inputDir = (transform.right * moveX + transform.forward * moveZ).normalized;
-       
+        currentSpeed = walkSpeed;
         float HorizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z).magnitude;
         if (HorizontalVel > sprintSpeed)
         {
-            sprintSpeed *= 0.3f;
-            walkSpeed *= 0.3f;
+            currentSpeed *= 0.3f;
         }
+        else { currentSpeed = walkSpeed; }
 
         if (Input.GetButtonDown("Jump"))
         {
@@ -157,7 +158,7 @@ public class PlayerMove : MonoBehaviour
 
     void HandleMovement()
     {
-        float targetSpeed = Input.GetKey(KeyCode.LeftShift) ? sprintSpeed : walkSpeed;
+        float targetSpeed = Input.GetKey(KeyCode.LeftShift) ? sprintSpeed : currentSpeed;
 
         if (inputDir.sqrMagnitude > 0.01f)
         {
