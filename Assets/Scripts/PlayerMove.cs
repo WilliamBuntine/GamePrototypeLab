@@ -14,6 +14,7 @@ public class PlayerMove : MonoBehaviour
     public float jumpForce;
     public float groundFriction;
     public float airControl;
+    public float maxAirSpeed;
     public float groundCheckDistance;
     public LayerMask groundMask;
 
@@ -113,11 +114,7 @@ public class PlayerMove : MonoBehaviour
         inputDir = (transform.right * moveX + transform.forward * moveZ).normalized;
         currentSpeed = walkSpeed;
         float HorizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z).magnitude;
-        if (HorizontalVel > sprintSpeed)
-        {
-            currentSpeed *= 0.3f;
-        }
-        else { currentSpeed = walkSpeed; }      //Regon: I tried fixing ts, air acceleration is cooked
+       
 
         if (Input.GetButtonDown("Jump"))
         {
@@ -159,6 +156,7 @@ public class PlayerMove : MonoBehaviour
     void HandleMovement()
     {
         float targetSpeed = Input.GetKey(KeyCode.LeftShift) ? sprintSpeed : currentSpeed;
+        Vector3 horizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
 
         if (inputDir.sqrMagnitude > 0.01f)
         {
@@ -170,14 +168,26 @@ public class PlayerMove : MonoBehaviour
             }
             else
             {
-                Vector3 airForce = inputDir * targetSpeed * airControl;
-                rb.AddForce(airForce, ForceMode.Acceleration);
+                if (horizontalVel.magnitude < maxAirSpeed)
+                {
+                    Vector3 airForce = inputDir * targetSpeed * airControl;
+                    rb.AddForce(airForce, ForceMode.Acceleration);
+
+                }
+                else {  
+                    // limit air speed
+                    Vector3 horizontalDir = horizontalVel.normalized;
+                    Vector3 desiredVel = horizontalDir * maxAirSpeed;
+                    Vector3 forceDir = (desiredVel - new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z)) * 10f;
+                    rb.AddForce(forceDir, ForceMode.Force);
+                }
+
             }
         }
         else if (grounded)
         {
             // friction only on ground
-            Vector3 horizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+            horizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
             Vector3 frictionForce = -horizontalVel * groundFriction;
             rb.AddForce(frictionForce, ForceMode.Acceleration);
         }
