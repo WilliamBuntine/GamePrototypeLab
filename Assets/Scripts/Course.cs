@@ -1,0 +1,70 @@
+using UnityEngine;
+
+public class Course : MonoBehaviour
+{
+    public string courseName;
+    public Checkpoint[] pointList;
+    public CourseUI ui;
+    public Timer timer;
+    public Scoreboard scoreboard;
+
+    private int checkpointsReached = 0;
+    private bool courseComplete = false;
+
+    public void CreateList()
+    {
+        if (ui != null)
+        {
+            ui.gameObject.SetActive(true); 
+            ui.activeCourse = this;
+            ui.GenerateUI(pointList.Length);
+        }
+
+        foreach (Checkpoint point in pointList)
+        {
+            if (point != null)
+                point.parentCourse = this;
+                point.Refresh();
+        }
+
+        checkpointsReached = 0;
+        courseComplete = false;
+        timer?.ResetTimer();
+        timer?.StartTimer();
+    }
+
+
+    public void UpdateList()
+    {
+        if (courseComplete) return;
+
+        checkpointsReached++;
+        ui?.FillNextCheckpoint();
+
+        if (checkpointsReached >= pointList.Length)
+        {
+            CompleteCourse();
+        }
+    }
+
+    void CompleteCourse()
+    {
+        courseComplete = true;
+        timer?.StopTimer();
+
+        float finalTime = timer != null ? timer.time : 0f;
+
+        foreach (Checkpoint point in pointList)
+        {
+            point.gameObject.SetActive(false);
+        }
+
+        scoreboard.UpdateScore(courseName, finalTime);
+
+        if (ui != null)
+            ui.activeCourse = null;
+            ui.gameObject.SetActive(false);
+
+        Debug.Log($"Course '{courseName}' complete! Final time: {finalTime:F2}s");
+    }
+}
