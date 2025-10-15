@@ -151,50 +151,6 @@ public class Swinging : MonoBehaviour
         }
     }
 
-    void GrappleReel()
-    {
-        float g = Mathf.Abs(Physics.gravity.y);
-        float hardMin = joint.minDistance + 0.01f;
-        Vector3 toAnchor = (swingPoint - player.position).normalized;
-        rb.AddForce(Vector3.up * (g * (1f - 0.5f)), ForceMode.Acceleration); // counteract gravity partially
-
-        rb.AddForce(toAnchor * reelStrength, ForceMode.Acceleration);
-        joint.maxDistance = Mathf.Max(hardMin, joint.maxDistance - reelRate * Time.fixedDeltaTime);
-
-    }
-
-    void ReelUp()
-    {
-        
-
-        rb.AddForce(player.up * sideThrust, ForceMode.Acceleration);
-        isSwinging = true;
-    }
-
-    void ReelDown()
-    {
-        rb.AddForce(-player.up * sideThrust, ForceMode.Acceleration);
-    }
-
-    void ReelLeft()
-    {
-        Vector3 r = player.position - swingPoint;
-        Vector3 rHoriz = Vector3.ProjectOnPlane(r, Vector3.up);
-        if (rHoriz.sqrMagnitude < 1e-6f) return;
-
-        Vector3 tangentCW = -Vector3.Cross(Vector3.up, rHoriz).normalized;
-        rb.AddForce(tangentCW * sideThrust, ForceMode.Acceleration);
-    }
-
-    void ReelRight()
-    {
-        Vector3 r = player.position - swingPoint;
-        Vector3 rHoriz = Vector3.ProjectOnPlane(r, Vector3.up);
-        if (rHoriz.sqrMagnitude < 1e-6f) return;
-
-        Vector3 tangentCCW = Vector3.Cross(Vector3.up, rHoriz).normalized;
-        rb.AddForce(tangentCCW * sideThrust, ForceMode.Acceleration);
-    }
 
     void StopSwing()
     {

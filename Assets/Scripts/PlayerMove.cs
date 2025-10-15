@@ -61,6 +61,7 @@ public class PlayerMove : MonoBehaviour
     private float originalColliderHeight;
     private Vector3 originalColliderCenter;
     private Vector3 originalCameraLocalPos;
+    private Swinging swinging;
 
 
 
