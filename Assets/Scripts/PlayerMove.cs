@@ -35,6 +35,12 @@ public class PlayerMove : MonoBehaviour
     public float wallPushUpForce = 3f;
     public bool wallRunningEnabled;
 
+    public float walljumpmultiplier;
+
+    public float wallJumpCooldown;
+    private float wallJumpTimer = 0f;
+    private bool hasWallJumped;
+
     [Header("Look Settings")]
     public float mouseSensitivity = 100f;
     public Transform playerCamera;
@@ -55,6 +61,7 @@ public class PlayerMove : MonoBehaviour
     private float originalColliderHeight;
     private Vector3 originalColliderCenter;
     private Vector3 originalCameraLocalPos;
+    private Swinging swinging;
 
 
 
@@ -69,10 +76,15 @@ public class PlayerMove : MonoBehaviour
         originalCameraLocalPos = playerCamera.localPosition;
 
         Cursor.lockState = CursorLockMode.Locked;
+        swinging = GetComponent<Swinging>();
+
     }
 
+    bool spaceHeld;
     void Update()
     {
+        spaceHeld = Input.GetKey(KeyCode.Space);
+
         HandleLook();
         GroundCheck();
         slideRefresh -= Time.deltaTime;
@@ -118,14 +130,16 @@ public class PlayerMove : MonoBehaviour
 
         if (Input.GetButtonDown("Jump"))
         {
-            if (grounded)
+            if (grounded && !swinging.isSwinging)
             {
                 Jump(Vector3.up);
             }
-            else if (wallDetector != null && wallDetector.nearWall)
+            else if (wallDetector != null && wallDetector.nearWall && !hasWallJumped && !grappling)
             {
                 WallJump();
+
             }
+            
         }
     }
 
@@ -245,6 +259,10 @@ public class PlayerMove : MonoBehaviour
 
     void WallJump()
     {
+        hasWallJumped = true;
+        wallJumpTimer = wallJumpCooldown;
+        Vector3 horizontalVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+        float speed = horizontalVelocity.magnitude;
         if (wallDetector == null || wallDetector.wallNormal == Vector3.zero) return;
         Vector3 HorizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
         float HorizSpeed = HorizontalVel.magnitude;

@@ -53,7 +53,7 @@ public class Swinging : MonoBehaviour
         if (Input.GetKeyDown(swingKey))
         {
             StartSwing();
-            playerController.grappling = true;
+            playerController.grappling = true;  //Assisting PlayerMove script to know when grappling
         }
         wHeld = Input.GetKey(KeyCode.W);
         aHeld = Input.GetKey(KeyCode.A);
@@ -150,6 +150,7 @@ public class Swinging : MonoBehaviour
             isSwinging = true;
         }
     }
+
 
     void StopSwing()
     {
