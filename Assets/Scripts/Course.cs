@@ -1,4 +1,6 @@
 using UnityEngine;
+using TMPro;
+
 
 public class Course : MonoBehaviour
 {
@@ -6,16 +8,19 @@ public class Course : MonoBehaviour
     public Checkpoint[] pointList;
     public CourseUI ui;
     public Timer timer;
+    public TextMeshProUGUI timerUI;
     public Scoreboard scoreboard;
 
     private int checkpointsReached = 0;
     private bool courseComplete = false;
 
+    public GameObject Course1;
+    public GameObject Course2;
     public void CreateList()
     {
         if (ui != null)
         {
-            ui.gameObject.SetActive(true); 
+            ui.gameObject.SetActive(true);
             ui.activeCourse = this;
             ui.GenerateUI(pointList.Length);
         }
@@ -24,11 +29,12 @@ public class Course : MonoBehaviour
         {
             if (point != null)
                 point.parentCourse = this;
-                point.Refresh();
+            point.Refresh();
         }
 
         checkpointsReached = 0;
         courseComplete = false;
+        timerUI.gameObject.SetActive(true);
         timer?.ResetTimer();
         timer?.StartTimer();
     }
@@ -51,6 +57,11 @@ public class Course : MonoBehaviour
     {
         courseComplete = true;
         timer?.StopTimer();
+        CourseStart.activeCourse = null;
+        Course1.GetComponent<CourseStart>().SetCourseActive(false);
+        Course2.GetComponent<CourseStart>().SetCourseActive(false);
+        
+                Debug.Log("course Finished.");
 
         float finalTime = timer != null ? timer.time : 0f;
 
@@ -63,7 +74,9 @@ public class Course : MonoBehaviour
 
         if (ui != null)
             ui.activeCourse = null;
-            ui.gameObject.SetActive(false);
+        ui.gameObject.SetActive(false);
+            timerUI.gameObject.SetActive(false);
+            
 
         Debug.Log($"Course '{courseName}' complete! Final time: {finalTime:F2}s");
     }

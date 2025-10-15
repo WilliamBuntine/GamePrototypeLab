@@ -5,16 +5,26 @@ public class CourseStart : MonoBehaviour
     [Header("References")]
     public Course course;
     public CourseUI ui;
-
+    public static CourseStart activeCourse;
     public PlayerMove player;
 
     private void Start()
     {
+
         SetCourseActive(false);
+        activeCourse = null;
     }
 
     public void StartCourse()
     {
+        if (activeCourse != null && activeCourse != course)
+        {
+            Debug.LogWarning($"Cannot start '{course.name}' — '{activeCourse.name}' is already active!");
+            return;
+        }
+
+        activeCourse = this;
+
         if (course == null)
         {
             Debug.LogWarning("No Course assigned to CourseStart!");
@@ -31,7 +41,7 @@ public class CourseStart : MonoBehaviour
         Debug.Log($"Course '{course.name}' started");
     }
 
-    private void SetCourseActive(bool active)
+    public void SetCourseActive(bool active)
     {
         course.gameObject.SetActive(active);
 
@@ -40,4 +50,6 @@ public class CourseStart : MonoBehaviour
             child.gameObject.SetActive(active);
         }
     }
+
+    
 }
