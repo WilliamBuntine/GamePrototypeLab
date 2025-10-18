@@ -77,12 +77,12 @@ public class GrappleBoost : MonoBehaviour
                 // Pull toward moving object
                 dirToPoint = (connectedBody.position - transform.position).normalized;
             }
-            else
+            else 
             {
                 dirToPoint = (grapplePoint - transform.position).normalized;
             }
             
-            playerForce = (0.5f + grappleTimer/4) * grappleBoostStrength;
+            float playerForce = (0.5f + grappleTimer/4) * grappleBoostStrength;
             rb.AddForce(dirToPoint * playerForce, ForceMode.VelocityChange);
 
             // Pull the object if it has a rigidbody
