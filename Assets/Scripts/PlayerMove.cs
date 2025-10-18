@@ -4,13 +4,18 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody), typeof(CapsuleCollider))]
 public class PlayerMove : MonoBehaviour
 {
+
+    public Course activeCourse;
+
     [Header("Movement Settings")]
     public bool grappling = false;
     public float walkSpeed = 7f;
+    float currentSpeed;
     public float sprintSpeed = 12f;
     public float jumpForce = 7f;
     public float groundFriction = 10f;
     public float airControl = 0.5f;
+    public float maxAirSpeed;
     public float groundCheckDistance = 0.5f;
     public LayerMask groundMask;
 
@@ -31,10 +36,21 @@ public class PlayerMove : MonoBehaviour
     public float wallPushUpForce = 3f;
     public bool wallRunningEnabled;
 
+    public float walljumpmultiplier;
+
+    public float wallJumpCooldown;
+    private float wallJumpTimer = 0f;
+    private bool hasWallJumped;
+
     [Header("Look Settings")]
     public float mouseSensitivity = 100f;
     public Transform playerCamera;
     public float cameraSlideHeightAdjust = -0.5f;
+
+    [Header("Sound Settings")]
+    public AudioSource audioSource; // Audio source for playing sounds
+    public AudioClip speedSound; // Sound to play when at high speed
+    private bool speedBreached;
 
     private Rigidbody rb;
     private CapsuleCollider capsule;
@@ -46,9 +62,9 @@ public class PlayerMove : MonoBehaviour
     private float originalColliderHeight;
     private Vector3 originalColliderCenter;
     private Vector3 originalCameraLocalPos;
+    private Swinging swinging;
 
-    public AudioSource audioSource; // Audio source for playing sounds
-    public AudioClip speedSound; // Sound to play when at high speed
+
 
     void Start()
     {
@@ -61,19 +77,30 @@ public class PlayerMove : MonoBehaviour
         originalCameraLocalPos = playerCamera.localPosition;
 
         Cursor.lockState = CursorLockMode.Locked;
+        swinging = GetComponent<Swinging>();
+
     }
 
+    bool spaceHeld;
     void Update()
     {
+        spaceHeld = Input.GetKey(KeyCode.Space);
+
         HandleLook();
         GroundCheck();
         slideRefresh -= Time.deltaTime;
 
         Vector3 horizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
         float SpeedHoriz = horizontalVel.magnitude;
-        if (SpeedHoriz > 15f)
+
+        if (SpeedHoriz > 30f && !speedBreached)
         {
             SpeedSound();
+            speedBreached = true;
+        }
+        else
+        {
+            speedBreached = false;
         }
 
 
@@ -96,18 +123,24 @@ public class PlayerMove : MonoBehaviour
         // Collect input here (for FixedUpdate use)
         float moveX = Input.GetAxisRaw("Horizontal");
         float moveZ = Input.GetAxisRaw("Vertical");
+        
         inputDir = (transform.right * moveX + transform.forward * moveZ).normalized;
+        currentSpeed = walkSpeed;
+        float HorizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z).magnitude;
+       
 
         if (Input.GetButtonDown("Jump"))
         {
-            if (grounded)
+            if (grounded && !swinging.isSwinging)
             {
                 Jump(Vector3.up);
             }
-            else if (wallDetector != null && wallDetector.nearWall)
+            else if (wallDetector != null && wallDetector.nearWall && !hasWallJumped && !grappling)
             {
                 WallJump();
+
             }
+            
         }
     }
 
@@ -137,7 +170,8 @@ public class PlayerMove : MonoBehaviour
 
     void HandleMovement()
     {
-        float targetSpeed = Input.GetKey(KeyCode.LeftShift) ? sprintSpeed : walkSpeed;
+        float targetSpeed = Input.GetKey(KeyCode.LeftShift) ? sprintSpeed : currentSpeed;
+        Vector3 horizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
 
         if (inputDir.sqrMagnitude > 0.01f)
         {
@@ -149,14 +183,26 @@ public class PlayerMove : MonoBehaviour
             }
             else
             {
-                Vector3 airForce = inputDir * targetSpeed * airControl;
-                rb.AddForce(airForce, ForceMode.Acceleration);
+                if (horizontalVel.magnitude < maxAirSpeed)
+                {
+                    Vector3 airForce = inputDir * targetSpeed * airControl;
+                    rb.AddForce(airForce, ForceMode.Acceleration);
+
+                }
+                else {  
+                    // limit air speed
+                    Vector3 horizontalDir = horizontalVel.normalized;
+                    Vector3 desiredVel = horizontalDir * maxAirSpeed;
+                    Vector3 forceDir = (desiredVel - new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z)) * 10f;
+                    rb.AddForce(forceDir, ForceMode.Force);
+                }
+
             }
         }
         else if (grounded)
         {
             // friction only on ground
-            Vector3 horizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+            horizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
             Vector3 frictionForce = -horizontalVel * groundFriction;
             rb.AddForce(frictionForce, ForceMode.Acceleration);
         }
@@ -214,6 +260,10 @@ public class PlayerMove : MonoBehaviour
 
     void WallJump()
     {
+        hasWallJumped = true;
+        wallJumpTimer = wallJumpCooldown;
+        Vector3 horizontalVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+        float speed = horizontalVelocity.magnitude;
         if (wallDetector == null || wallDetector.wallNormal == Vector3.zero) return;
         Vector3 HorizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
         float HorizSpeed = HorizontalVel.magnitude;
@@ -234,4 +284,13 @@ public class PlayerMove : MonoBehaviour
     {
         audioSource.PlayOneShot(speedSound);
     }
+
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("P1"))
+        {
+            
+        }
+    }
 }
+

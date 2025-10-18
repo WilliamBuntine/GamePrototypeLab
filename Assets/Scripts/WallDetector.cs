@@ -4,7 +4,11 @@ public class WallDetector : MonoBehaviour
 {
     [HideInInspector] public bool nearWall = false;
     [HideInInspector] public Vector3 wallNormal;
-
+    Rigidbody rb;
+    PlayerMove playerMove;
+    public SphereCollider sphere;
+    public float baseRadius;
+    public float maxRadius;
     private void OnTriggerStay(Collider other)
     {
         if (other.CompareTag("Jumpable"))
@@ -16,8 +20,25 @@ public class WallDetector : MonoBehaviour
             wallNormal = dir;
         }
     }
+    void Start()
+    {
+        rb = GetComponentInParent<Rigidbody>();
+        playerMove = GetComponentInParent<PlayerMove>();
 
+    }
 
+    void Update()
+    {
+        Vector3 horizontalVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+
+        float speed = horizontalVelocity.magnitude;
+        if (speed > 7f)
+        {
+            sphere.radius = maxRadius; // because radius * 2 ≈ diameter in world scale
+
+        } else sphere.radius = baseRadius;
+
+    }
     private void OnTriggerExit(Collider other)
     {
         if (other.CompareTag("Jumpable"))
@@ -26,4 +47,6 @@ public class WallDetector : MonoBehaviour
             wallNormal = Vector3.zero;
         }
     }
+
+
 }

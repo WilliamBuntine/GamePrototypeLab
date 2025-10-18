@@ -19,6 +19,7 @@ public class GrappleBoost : MonoBehaviour
     public float maxGrappleDistance = 80f;
     public float grappleBoostStrength = 5f;
     public float ropePullDuration = 0.2f;
+    public float grappleAccelTimeCap = 1f;
 
     [Header("Cooldown")]
     public float grappleCooldown = 0.1f;
@@ -28,6 +29,8 @@ public class GrappleBoost : MonoBehaviour
     private Vector3 currentGrapplePosition;
     private bool isGrappling;
     private float grappleTimer;
+
+    private Rigidbody connectedBody; // NEW: optional rigidbody being grappled
 
     public AudioSource audioSource; // Audio source for playing sounds
     public AudioClip grappleSound; // Sound to play when grappling
@@ -40,7 +43,6 @@ public class GrappleBoost : MonoBehaviour
 
     void Update()
     {
-        // Countdown cooldown
         if (cooldownTimer > 0f)
             cooldownTimer -= Time.deltaTime;
 
@@ -65,25 +67,36 @@ public class GrappleBoost : MonoBehaviour
         if (!isGrappling) return;
 
         grappleTimer += Time.fixedDeltaTime;
-        if (grappleTimer > 1f) { grappleTimer = 1f; }
+        if (grappleTimer > grappleAccelTimeCap ) { grappleTimer = grappleAccelTimeCap; }
 
-        //if (grappleTimer < ropePullDuration)
-        //{
-            // Apply force toward grapple point (edit: multiplied by how long the grapple is active)
-            Vector3 dir = (grapplePoint - transform.position).normalized;
-            rb.AddForce((0.5f + grappleTimer) * grappleBoostStrength * dir, ForceMode.VelocityChange);
-        //}
-        //else
-        //{
-            //StopGrapple();
-        //}
 
+        // Pull player toward grapple point
+            Vector3 dirToPoint;
+            if (connectedBody != null)
+            {
+                // Pull toward moving object
+                dirToPoint = (connectedBody.position - transform.position).normalized;
+            }
+            else
+            {
+                dirToPoint = (grapplePoint - transform.position).normalized;
+            }
+            
+            playerForce = (0.5f + grappleTimer/4) * grappleBoostStrength;
+            rb.AddForce(dirToPoint * playerForce, ForceMode.VelocityChange);
+
+            // Pull the object if it has a rigidbody
+            if (connectedBody != null && !connectedBody.isKinematic)
+            {
+                Vector3 dirToPlayer = (transform.position - connectedBody.position).normalized;
+                connectedBody.AddForce(dirToPlayer * grappleBoostStrength * 0.5f, ForceMode.VelocityChange);
+            }
         //stop grapple when player is too close to grapple point
-        if (Vector3.Distance(grapplePoint, gunTip.position) < 3f)
-        {
+          if (Vector3.Distance(grapplePoint, gunTip.position) < 3f)
+          {
             StopGrapple();
+          }
         }
-    }
 
     void TryStartGrapple()
     {
@@ -92,9 +105,9 @@ public class GrappleBoost : MonoBehaviour
         {
             // Play grapple sound
             PlayGrappleReelSound();
-            audioSource.clip = grappleSound;
-            audioSource.Play();
+
             grapplePoint = hit.point;
+            connectedBody = hit.rigidbody; // NEW: save rigidbody if any
             currentGrapplePosition = gunTip.position;
             isGrappling = true;
             grappleTimer = 0f;
@@ -109,16 +122,20 @@ public class GrappleBoost : MonoBehaviour
     void StopGrapple()
     {
         isGrappling = false;
+        connectedBody = null; // NEW
         lr.positionCount = 0;
     }
 
     void DrawRope()
     {
-        currentGrapplePosition = Vector3.Lerp(currentGrapplePosition, grapplePoint, Time.deltaTime * 10f);
+        if (!isGrappling) return;
+
+        // Directly update rope line (no smoothing)
+        Vector3 targetPoint = connectedBody != null ? connectedBody.position : grapplePoint;
         lr.SetPosition(0, gunTip.position);
-        lr.SetPosition(1, currentGrapplePosition);
+        lr.SetPosition(1, targetPoint);
     }
-    
+
     void PlayGrappleReelSound()
     {
         audioSource.clip = grappleSound;
