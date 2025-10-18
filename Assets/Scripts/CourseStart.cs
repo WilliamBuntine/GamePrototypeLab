@@ -51,5 +51,15 @@ public class CourseStart : MonoBehaviour
         }
     }
 
-    
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Player"))
+        { 
+            StartCourse();
+            gameObject.SetActive(false);
+        }
+    }
+
+
+
 }
