@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody), typeof(CapsuleCollider))]
@@ -8,18 +9,18 @@ public class PlayerMove : MonoBehaviour
 
     [Header("Movement Settings")]
     public bool grappling = false;
-    public float walkSpeed;
+    public float walkSpeed = 7f;
     float currentSpeed;
-    public float sprintSpeed;
-    public float jumpForce;
-    public float groundFriction;
-    public float airControl;
+    public float sprintSpeed = 12f;
+    public float jumpForce = 7f;
+    public float groundFriction = 10f;
+    public float airControl = 0.5f;
     public float maxAirSpeed;
-    public float groundCheckDistance;
+    public float groundCheckDistance = 0.5f;
     public LayerMask groundMask;
 
     [Header("Slide Settings")]
-    public float slideFrictionAdjustment;
+    public float slideFrictionAdjustment = 5f;
     public float slideDuration = 1f;
     public float slideHeight = 0.5f;       // how short the collider gets while sliding
     public KeyCode slideKey = KeyCode.LeftControl;
@@ -104,7 +105,7 @@ public class PlayerMove : MonoBehaviour
 
 
         // start slide
-        if (Input.GetKeyDown(slideKey) && !isSliding && slideRefresh <= 0f)
+        if ((Input.GetKeyDown(slideKey) && !isSliding && slideRefresh <= 0f))
         {
             StartSlide();
         }
@@ -211,7 +212,7 @@ public class PlayerMove : MonoBehaviour
     {
         // low friction → keeps momentum
         Vector3 horizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
-        Vector3 slideFriction = -horizontalVel * groundFriction * slideFrictionAdjustment;
+        Vector3 slideFriction = groundFriction * slideFrictionAdjustment * -horizontalVel;
         rb.AddForce(slideFriction, ForceMode.Acceleration);
     }
 

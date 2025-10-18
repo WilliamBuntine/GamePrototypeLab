@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
@@ -15,12 +16,13 @@ public class GrappleBoost : MonoBehaviour
     public LayerMask grappleable;
 
     [Header("Grapple Settings")]
-    public float maxGrappleDistance = 40f;
-    public float grappleBoostStrength = 30f;
+    public float maxGrappleDistance = 80f;
+    public float grappleBoostStrength = 5f;
     public float ropePullDuration = 0.2f;
+    public float grappleAccelTimeCap = 1f;
 
     [Header("Cooldown")]
-    public float grappleCooldown = 2f;
+    public float grappleCooldown = 0.1f;
     private float cooldownTimer;
 
     private Vector3 grapplePoint;
@@ -65,10 +67,10 @@ public class GrappleBoost : MonoBehaviour
         if (!isGrappling) return;
 
         grappleTimer += Time.fixedDeltaTime;
+        if (grappleTimer > grappleAccelTimeCap ) { grappleTimer = grappleAccelTimeCap; }
+
 
         // Pull player toward grapple point
-        if (grappleTimer < ropePullDuration)
-        {
             Vector3 dirToPoint;
             if (connectedBody != null)
             {
@@ -79,8 +81,9 @@ public class GrappleBoost : MonoBehaviour
             {
                 dirToPoint = (grapplePoint - transform.position).normalized;
             }
-
-            rb.AddForce(dirToPoint * grappleBoostStrength, ForceMode.VelocityChange);
+            
+            playerForce = (0.5f + grappleTimer/4) * grappleBoostStrength;
+            rb.AddForce(dirToPoint * playerForce, ForceMode.VelocityChange);
 
             // Pull the object if it has a rigidbody
             if (connectedBody != null && !connectedBody.isKinematic)
@@ -88,12 +91,12 @@ public class GrappleBoost : MonoBehaviour
                 Vector3 dirToPlayer = (transform.position - connectedBody.position).normalized;
                 connectedBody.AddForce(dirToPlayer * grappleBoostStrength * 0.5f, ForceMode.VelocityChange);
             }
-        }
-        else
-        {
+        //stop grapple when player is too close to grapple point
+          if (Vector3.Distance(grapplePoint, gunTip.position) < 3f)
+          {
             StopGrapple();
+          }
         }
-    }
 
     void TryStartGrapple()
     {
