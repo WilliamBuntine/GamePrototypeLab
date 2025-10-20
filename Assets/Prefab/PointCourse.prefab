@@ -571,7 +571,7 @@ Transform:
   m_GameObject: {fileID: 9155629328783895814}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 42.57804, y: 13.664415, z: 164.12338}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -602,4 +602,8 @@ MonoBehaviour:
   - {fileID: 4834308162060594681}
   ui: {fileID: 0}
   timer: {fileID: 3840766197366016413}
+  timerUI: {fileID: 0}
   scoreboard: {fileID: 0}
+  startCheckpoint: {fileID: 0}
+  Course1: {fileID: 0}
+  Course2: {fileID: 0}
