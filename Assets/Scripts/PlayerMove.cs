@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody), typeof(CapsuleCollider))]
@@ -9,15 +10,17 @@ public class PlayerMove : MonoBehaviour
     [Header("Movement Settings")]
     public bool grappling = false;
     public float walkSpeed = 7f;
+    float currentSpeed;
     public float sprintSpeed = 12f;
     public float jumpForce = 7f;
-    public float groundFriction = 12f;
+    public float groundFriction = 10f;
     public float airControl = 0.5f;
+    public float maxAirSpeed;
     public float groundCheckDistance = 0.5f;
     public LayerMask groundMask;
 
     [Header("Slide Settings")]
-    public float slideFrictionAdjustment = 0.2f;
+    public float slideFrictionAdjustment = 5f;
     public float slideDuration = 1f;
     public float slideHeight = 0.5f;       // how short the collider gets while sliding
     public KeyCode slideKey = KeyCode.LeftControl;
@@ -53,6 +56,7 @@ public class PlayerMove : MonoBehaviour
     private float originalColliderHeight;
     private Vector3 originalColliderCenter;
     private Vector3 originalCameraLocalPos;
+    private Swinging swinging;
 
 
 
@@ -90,7 +94,7 @@ public class PlayerMove : MonoBehaviour
 
 
         // start slide
-        if (Input.GetKeyDown(slideKey) && !isSliding && slideRefresh <= 0f)
+        if ((Input.GetKeyDown(slideKey) && !isSliding && slideRefresh <= 0f))
         {
             StartSlide();
         }
@@ -108,7 +112,11 @@ public class PlayerMove : MonoBehaviour
         // Collect input here (for FixedUpdate use)
         float moveX = Input.GetAxisRaw("Horizontal");
         float moveZ = Input.GetAxisRaw("Vertical");
+        
         inputDir = (transform.right * moveX + transform.forward * moveZ).normalized;
+        currentSpeed = walkSpeed;
+        float HorizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z).magnitude;
+       
 
         if (Input.GetButtonDown("Jump"))
         {
@@ -149,7 +157,8 @@ public class PlayerMove : MonoBehaviour
 
     void HandleMovement()
     {
-        float targetSpeed = Input.GetKey(KeyCode.LeftShift) ? sprintSpeed : walkSpeed;
+        float targetSpeed = Input.GetKey(KeyCode.LeftShift) ? sprintSpeed : currentSpeed;
+        Vector3 horizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
 
         if (inputDir.sqrMagnitude > 0.01f)
         {
@@ -161,14 +170,26 @@ public class PlayerMove : MonoBehaviour
             }
             else
             {
-                Vector3 airForce = inputDir * targetSpeed * airControl;
-                rb.AddForce(airForce, ForceMode.Acceleration);
+                if (horizontalVel.magnitude < maxAirSpeed)
+                {
+                    Vector3 airForce = inputDir * targetSpeed * airControl;
+                    rb.AddForce(airForce, ForceMode.Acceleration);
+
+                }
+                else {  
+                    // limit air speed
+                    Vector3 horizontalDir = horizontalVel.normalized;
+                    Vector3 desiredVel = horizontalDir * maxAirSpeed;
+                    Vector3 forceDir = (desiredVel - new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z)) * 10f;
+                    rb.AddForce(forceDir, ForceMode.Force);
+                }
+
             }
         }
         else if (grounded)
         {
             // friction only on ground
-            Vector3 horizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+            horizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
             Vector3 frictionForce = -horizontalVel * groundFriction;
             rb.AddForce(frictionForce, ForceMode.Acceleration);
         }
@@ -178,7 +199,7 @@ public class PlayerMove : MonoBehaviour
     {
         // low friction → keeps momentum
         Vector3 horizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
-        Vector3 slideFriction = -horizontalVel * groundFriction * slideFrictionAdjustment;
+        Vector3 slideFriction = groundFriction * slideFrictionAdjustment * -horizontalVel;
         rb.AddForce(slideFriction, ForceMode.Acceleration);
     }
 
