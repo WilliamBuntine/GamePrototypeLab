@@ -7,8 +7,8 @@ public class WallDetector : MonoBehaviour
     Rigidbody rb;
     PlayerMove playerMove;
     public SphereCollider sphere;
-    public float baseRadius;
-    public float maxRadius;
+    public float baseRadius = 0.5f;
+    public float maxRadius = 0.8f;
     private void OnTriggerStay(Collider other)
     {
         if (other.CompareTag("Jumpable"))

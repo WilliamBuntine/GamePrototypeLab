@@ -15,8 +15,6 @@ public class Course : MonoBehaviour
     private int checkpointsReached = 0;
     private bool courseComplete = false;
 
-    public GameObject Course1;
-    public GameObject Course2;
     public void CreateList()
     {
         if (ui != null)
@@ -60,8 +58,6 @@ public class Course : MonoBehaviour
         
         timer?.StopTimer();
         CourseStart.activeCourse = null;
-        Course1.GetComponent<CourseStart>().SetCourseActive(false);
-        Course2.GetComponent<CourseStart>().SetCourseActive(false);
         
                 Debug.Log("course Finished.");
 
