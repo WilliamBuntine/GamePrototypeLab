@@ -20,14 +20,11 @@ public class PlayerMove : MonoBehaviour
     public LayerMask groundMask;
 
     [Header("Slide Settings")]
-    public float slideFrictionAdjustment = 5f;
-    public float slideDuration = 1f;
+    public float slideFrictionMult = 1f;
+    public float slideDuration = 10f;
     public float slideHeight = 0.5f;       // how short the collider gets while sliding
     public KeyCode slideKey = KeyCode.LeftControl;
     private bool isSliding = false;
-    private float slideTimer = 0f;
-    private float slideRefresh = 0f;
-    private float slideCooldown = 2f;
 
 
     [Header("Wall Jump Settings")]
@@ -79,7 +76,6 @@ public class PlayerMove : MonoBehaviour
     {
         HandleLook();
         GroundCheck();
-        slideRefresh -= Time.deltaTime;
 
         Vector3 horizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
         float SpeedHoriz = horizontalVel.magnitude;
@@ -96,7 +92,7 @@ public class PlayerMove : MonoBehaviour
 
 
         // start slide
-        if ((Input.GetKeyDown(slideKey) && !isSliding && slideRefresh <= 0f))
+        if ((Input.GetKeyDown(slideKey)))
         {
             StartSlide();
         }
@@ -104,8 +100,7 @@ public class PlayerMove : MonoBehaviour
         // end slide (timer or key up)
         if (isSliding)
         {
-            slideTimer -= Time.deltaTime;
-            if (slideTimer <= 0f || Input.GetKeyUp(slideKey))
+            if (Input.GetKeyUp(slideKey))
             {
                 StopSlide();
             }
@@ -135,14 +130,18 @@ public class PlayerMove : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (!isSliding) // disable control while sliding
+        if (isSliding)
         {
-            HandleMovement();
+            slideFrictionMult += Time.fixedDeltaTime / slideDuration;
+            slideFrictionMult = Mathf.Clamp01(slideFrictionMult);
         }
         else
         {
-            HandleSlideMovement();
+            slideFrictionMult = 1f; // normal movement when not sliding
         }
+        
+        HandleMovement();
+
     }
 
     void HandleLook()
@@ -192,24 +191,15 @@ public class PlayerMove : MonoBehaviour
         {
             // friction only on ground
             horizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
-            Vector3 frictionForce = -horizontalVel * groundFriction;
+            Vector3 frictionForce = -horizontalVel * (groundFriction * slideFrictionMult);
             rb.AddForce(frictionForce, ForceMode.Acceleration);
         }
-    }
-
-    void HandleSlideMovement()
-    {
-        // low friction → keeps momentum
-        Vector3 horizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
-        Vector3 slideFriction = groundFriction * slideFrictionAdjustment * -horizontalVel;
-        rb.AddForce(slideFriction, ForceMode.Acceleration);
     }
 
     void StartSlide()
     {
         isSliding = true;
-        slideTimer = slideDuration;
-        slideRefresh = slideCooldown;
+        slideFrictionMult = 0f;
 
         // shrink collider
         capsule.height = slideHeight;
@@ -225,6 +215,8 @@ public class PlayerMove : MonoBehaviour
     void StopSlide()
     {
         isSliding = false;
+        slideFrictionMult = 1f;
+
 
         // restore collider
         capsule.height = originalColliderHeight;
@@ -258,7 +250,6 @@ public class PlayerMove : MonoBehaviour
         if (wallAngle < minAngle || wallAngle > maxAngle) return;
 
         Vector3 jumpDir = wallDetector.wallNormal * wallPushAwayForce + Vector3.up * wallPushUpForce;
-        print("WALLJUMP!");
         Jump(jumpDir);
     }
 
@@ -270,14 +261,6 @@ public class PlayerMove : MonoBehaviour
     void SpeedSound()
     {
         audioSource.PlayOneShot(speedSound);
-    }
-
-    void OnTriggerEnter(Collider other)
-    {
-        if (other.CompareTag("P1"))
-        {
-            
-        }
     }
 }
 
