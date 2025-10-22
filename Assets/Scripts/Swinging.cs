@@ -89,7 +89,7 @@ public class Swinging : MonoBehaviour
 
         float adaptiveLeeway = Mathf.Max(minLeeway, shortestDistance * leewayFraction);
         float hardMin = joint.minDistance + 0.01f;
-        float targetMax = Mathf.Max(shortestDistance + adaptiveLeeway, hardMin);
+        float targetMax = shortestDistance; //Mathf.Max(shortestDistance + adaptiveLeeway, hardMin);
 
         joint.maxDistance = targetMax;
 
