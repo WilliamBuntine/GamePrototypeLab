@@ -262,6 +262,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: daec3e2fd03057e4994845dc1220c9d2, type: 3}
+--- !u!114 &571565884 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6787971732361070926, guid: daec3e2fd03057e4994845dc1220c9d2, type: 3}
+  m_PrefabInstance: {fileID: 571565883}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c5ee69e31608858458fbe2f2625549d3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &812259203
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -324,6 +335,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3307960843508508514, guid: d41ed9d9578b41a4981887e10267b724, type: 3}
   m_PrefabInstance: {fileID: 812259203}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &812259205 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5847427484041258948, guid: d41ed9d9578b41a4981887e10267b724, type: 3}
+  m_PrefabInstance: {fileID: 812259203}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59a012f0b02de064294a28cd1cc7caf4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &844914937
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -336,6 +358,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: StartCheckpoint
       objectReference: {fileID: 0}
+    - target: {fileID: 4710013929638286056, guid: 95f912ad8396f134188c7718d598fab5, type: 3}
+      propertyPath: ui
+      value: 
+      objectReference: {fileID: 999633780}
+    - target: {fileID: 4710013929638286056, guid: 95f912ad8396f134188c7718d598fab5, type: 3}
+      propertyPath: course
+      value: 
+      objectReference: {fileID: 571565884}
+    - target: {fileID: 4710013929638286056, guid: 95f912ad8396f134188c7718d598fab5, type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 812259205}
     - target: {fileID: 8258146001168347925, guid: 95f912ad8396f134188c7718d598fab5, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
