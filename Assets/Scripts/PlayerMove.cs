@@ -35,6 +35,8 @@ public class PlayerMove : MonoBehaviour
     public float wallPushAwayForce = 5f;
     public float wallPushUpForce = 3f;
     public bool wallRunningEnabled;
+    public float minAngle = 70f;
+    public float maxAngle = 110f;
 
     [Header("Look Settings")]
     public float mouseSensitivity = 100f;
@@ -248,14 +250,16 @@ public class PlayerMove : MonoBehaviour
     void WallJump()
     {
         if (wallDetector == null || wallDetector.wallNormal == Vector3.zero) return;
-        Vector3 HorizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
-        float HorizSpeed = HorizontalVel.magnitude;
+
+        // Angle between wall normal and vertical
+        float wallAngle = Vector3.Angle(Vector3.up, wallDetector.wallNormal);
+        print(wallAngle);
+
+        if (wallAngle < minAngle || wallAngle > maxAngle) return;
 
         Vector3 jumpDir = wallDetector.wallNormal * wallPushAwayForce + Vector3.up * wallPushUpForce;
+        print("WALLJUMP!");
         Jump(jumpDir);
-
-
-
     }
 
     void GroundCheck()
