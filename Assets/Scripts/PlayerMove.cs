@@ -161,6 +161,22 @@ public class PlayerMove : MonoBehaviour
         float targetSpeed = Input.GetKey(KeyCode.LeftShift) ? sprintSpeed : currentSpeed;
         Vector3 horizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
 
+        if (isSliding)
+        {
+            // Sliding movement — preserve existing momentum, just add a gentle input-based push
+            if (inputDir.sqrMagnitude > 0.01f)
+            {
+                Vector3 slideForce = inputDir * targetSpeed * 0.8f; // smaller than normal movement
+                rb.AddForce(slideForce, ForceMode.Force);
+            }
+
+            // Gradually restoring friction
+            Vector3 frictionForce = -horizontalVel * (groundFriction * slideFrictionMult);
+            rb.AddForce(frictionForce, ForceMode.Acceleration);
+            return; // skip the rest while sliding
+        }
+
+        // Non-sliding movement
         if (inputDir.sqrMagnitude > 0.01f)
         {
             if (grounded || (grappling && wallDetector != null && wallDetector.nearWall && wallRunningEnabled))
@@ -175,26 +191,26 @@ public class PlayerMove : MonoBehaviour
                 {
                     Vector3 airForce = inputDir * targetSpeed * airControl;
                     rb.AddForce(airForce, ForceMode.Acceleration);
-
                 }
-                else {  
+                else
+                {
                     // limit air speed
                     Vector3 horizontalDir = horizontalVel.normalized;
                     Vector3 desiredVel = horizontalDir * maxAirSpeed;
                     Vector3 forceDir = (desiredVel - new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z)) * 10f;
                     rb.AddForce(forceDir, ForceMode.Force);
                 }
-
             }
         }
         else if (grounded)
         {
-            // friction only on ground
+            // friction only on ground when idle
             horizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
             Vector3 frictionForce = -horizontalVel * (groundFriction * slideFrictionMult);
             rb.AddForce(frictionForce, ForceMode.Acceleration);
         }
     }
+
 
     void StartSlide()
     {
