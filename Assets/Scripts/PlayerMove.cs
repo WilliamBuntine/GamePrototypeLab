@@ -6,6 +6,7 @@ public class PlayerMove : MonoBehaviour
 {
 
     public Course activeCourse;
+    public KeyCode resetKey = KeyCode.G;
 
     [Header("Movement Settings")]
     public bool grappling = false;
@@ -126,6 +127,20 @@ public class PlayerMove : MonoBehaviour
                 WallJump();
             }
         }
+
+        if (Input.GetKeyDown(resetKey))
+        {
+            activeCourse.CancelCourse();
+
+            transform.position = activeCourse.respawnPoint.transform.position;
+
+            transform.rotation = activeCourse.respawnPoint.transform.rotation;
+
+            Rigidbody rb = GetComponent<Rigidbody>();
+            if (rb != null)
+                rb.linearVelocity = Vector3.zero;
+        }
+
     }
 
     void FixedUpdate()

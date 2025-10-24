@@ -11,6 +11,7 @@ public class Course : MonoBehaviour
     public TextMeshProUGUI timerUI;
     public Scoreboard scoreboard;
     public GameObject startCheckpoint;
+    public GameObject respawnPoint;
 
     private int checkpointsReached = 0;
     private bool courseComplete = false;
@@ -83,5 +84,34 @@ public class Course : MonoBehaviour
         }
 
         Debug.Log($"Course '{courseName}' complete! Final time: {finalTime:F2}s");
+    }
+
+    public void CancelCourse()
+    {
+        courseComplete = true;
+        
+        timer?.StopTimer();
+        CourseStart.activeCourse = null;
+        
+        Debug.Log("Eminem Cancelled.");
+
+        if (startCheckpoint != null)
+        {
+            startCheckpoint.SetActive(true);
+        }
+
+        foreach (Checkpoint point in pointList)
+        {
+            point.gameObject.SetActive(false);
+        }
+
+        if (ui != null)
+        {
+            ui.activeCourse = null;
+            ui.gameObject.SetActive(false);
+            timerUI.gameObject.SetActive(false);
+        }
+
+        Debug.Log($"Course '{courseName}' Cancelled!");
     }
 }

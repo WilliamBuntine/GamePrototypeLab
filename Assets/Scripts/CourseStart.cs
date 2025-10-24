@@ -23,7 +23,7 @@ public class CourseStart : MonoBehaviour
             return;
         }
 
-        activeCourse = this;
+        player.activeCourse = course;
 
         if (course == null)
         {
