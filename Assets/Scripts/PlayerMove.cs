@@ -203,6 +203,7 @@ public class PlayerMove : MonoBehaviour
                 Vector3 desiredVel = inputDir * targetSpeed;
                 Vector3 forceDir = (desiredVel - new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z)) * 10f;
                 rb.AddForce(forceDir, ForceMode.Force);
+                Walksound();
             }
             else
             {
@@ -305,6 +306,7 @@ public class PlayerMove : MonoBehaviour
 
     void Walksound()
     {
+        Walking.pitch = 0.7f;
         audioSource.PlayOneShot(Walking);
     }
 }
