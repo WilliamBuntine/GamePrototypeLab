@@ -70,7 +70,7 @@ public class Scoreboard : MonoBehaviour
             int seconds = Mathf.FloorToInt(entry.bestTime % 60);
             int milliseconds = Mathf.FloorToInt((entry.bestTime * 1000) % 1000);
 
-            sb.AppendLine($"{entry.courseName}: {minutes:00}:{seconds:00}:{milliseconds:000}");
+            sb.AppendLine($"{entry.courseName} - {minutes:00}:{seconds:00}:{milliseconds:000}");
         }
 
         scoreboardText.text = sb.ToString();
