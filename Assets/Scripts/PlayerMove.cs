@@ -1,3 +1,6 @@
+using System.Diagnostics;
+using System.Globalization;
+using System.Runtime.InteropServices;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -48,12 +51,16 @@ public class PlayerMove : MonoBehaviour
     public AudioClip Jumping; // Sound to play when jumping
 
     public AudioClip Walking; // Sound to play when walking
+    public float footstepInterval; // Interval between footstep sounds
+    public float footstepTimer = 0f; // Timer to track footstep intervals
     private bool speedBreached;
+
 
     private Rigidbody rb;
     private CapsuleCollider capsule;
     private float xRotation = 0f;
     public bool grounded { get; private set; }
+    public bool walkingSoundPlaying = false;
     private Vector3 inputDir;
 
     // store original collider + camera info
@@ -79,6 +86,14 @@ public class PlayerMove : MonoBehaviour
 
     void Update()
     {
+        float HorizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z).magnitude;
+        SetstepInverval(HorizontalVel);
+
+        footstepTimer += Time.deltaTime;
+        if(CheckWalkingandGrounded())
+        {
+            Walksound();
+        }
         HandleLook();
         GroundCheck();
 
@@ -117,7 +132,6 @@ public class PlayerMove : MonoBehaviour
         
         inputDir = (transform.right * moveX + transform.forward * moveZ).normalized;
         currentSpeed = walkSpeed;
-        float HorizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z).magnitude;
        
 
         if (Input.GetButtonDown("Jump"))
@@ -203,7 +217,6 @@ public class PlayerMove : MonoBehaviour
                 Vector3 desiredVel = inputDir * targetSpeed;
                 Vector3 forceDir = (desiredVel - new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z)) * 10f;
                 rb.AddForce(forceDir, ForceMode.Force);
-                Walksound();
             }
             else
             {
@@ -306,8 +319,42 @@ public class PlayerMove : MonoBehaviour
 
     void Walksound()
     {
-        Walking.pitch = 0.7f;
-        audioSource.PlayOneShot(Walking);
+        if (footstepTimer >= footstepInterval)
+        {
+            audioSource.pitch = Random.Range(0.8f, 1.2f);
+            audioSource.PlayOneShot(Walking);
+            UnityEngine.Debug.Log("Playing walking sound");
+            footstepTimer = 0f;
+
+        }
+
+
+
+        return;
+    }
+
+    bool CheckWalkingandGrounded()
+    {
+        Vector3 horizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+        float SpeedHoriz = horizontalVel.magnitude;
+
+        if (SpeedHoriz > 1f && grounded && !isSliding)
+        {
+            walkingSoundPlaying = true;
+        }
+        else
+        {
+            walkingSoundPlaying = false;
+            footstepTimer = 0f; // reset timer when not walking
+        }
+
+
+        return walkingSoundPlaying;
+    }
+    
+    void SetstepInverval(float interval)
+    {
+        footstepInterval = interval / 5f;
     }
 }
 
