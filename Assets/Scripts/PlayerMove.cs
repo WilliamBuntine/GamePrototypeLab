@@ -44,6 +44,10 @@ public class PlayerMove : MonoBehaviour
     [Header("Sound Settings")]
     public AudioSource audioSource; // Audio source for playing sounds
     public AudioClip speedSound; // Sound to play when at high speed
+
+    public AudioClip Jumping; // Sound to play when jumping
+
+    public AudioClip Walking; // Sound to play when walking
     private bool speedBreached;
 
     private Rigidbody rb;
@@ -199,6 +203,7 @@ public class PlayerMove : MonoBehaviour
                 Vector3 desiredVel = inputDir * targetSpeed;
                 Vector3 forceDir = (desiredVel - new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z)) * 10f;
                 rb.AddForce(forceDir, ForceMode.Force);
+                Walksound();
             }
             else
             {
@@ -264,7 +269,7 @@ public class PlayerMove : MonoBehaviour
 
         // Set the Rigidbody velocity to current horizontal + jump vertical
         rb.linearVelocity = horizontalVel + direction * jumpForce;
-
+        JumpSound();
         // Stop slide if jumping out of it
         // if (isSliding) StopSlide();
     }
@@ -292,6 +297,17 @@ public class PlayerMove : MonoBehaviour
     void SpeedSound()
     {
         audioSource.PlayOneShot(speedSound);
+    }
+
+    void JumpSound()
+    {
+        audioSource.PlayOneShot(Jumping);
+    }
+
+    void Walksound()
+    {
+        Walking.pitch = 0.7f;
+        audioSource.PlayOneShot(Walking);
     }
 }
 
