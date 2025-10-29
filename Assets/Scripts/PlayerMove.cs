@@ -354,7 +354,7 @@ public class PlayerMove : MonoBehaviour
     
     void SetstepInverval(float interval)
     {
-        footstepInterval = interval / 5f;
+        footstepInterval = interval / 20f;
     }
 }
 
