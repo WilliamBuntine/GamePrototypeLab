@@ -29,29 +29,38 @@ public class GrappleBoost : MonoBehaviour
     private Vector3 currentGrapplePosition;
     private bool isGrappling;
     private float grappleTimer;
+    private bool grappleDinged;
 
     private Rigidbody connectedBody; // NEW: optional rigidbody being grappled
 
     public AudioSource audioSource; // Audio source for playing sounds
     public AudioClip grappleSound; // Sound to play when grappling
+    public AudioClip grappleReadySound; // Sound to play when grappling
+    public AudioClip grappleOffSound; // Sound to play when grappling
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         cooldownTimer = 0f;
+        grappleDinged = true;
     }
 
     void Update()
     {
         if (cooldownTimer > 0f)
             cooldownTimer -= Time.deltaTime;
+        
+        if (cooldownTimer <= 0f && grappleDinged == false)
+        {
+            PlayGrappleDingSound();
+        }
 
         if (Input.GetKeyDown(grappleKey) && cooldownTimer <= 0f)
         {
             TryStartGrapple();
         }
 
-        if (Input.GetKeyUp(grappleKey))
+        if (Input.GetKeyUp(grappleKey) && isGrappling)
         {
             StopGrapple();
         }
@@ -115,7 +124,6 @@ public class GrappleBoost : MonoBehaviour
             lr.positionCount = 2;
 
             // Start cooldown
-            cooldownTimer = grappleCooldown;
         }
     }
 
@@ -124,6 +132,11 @@ public class GrappleBoost : MonoBehaviour
         isGrappling = false;
         connectedBody = null; // NEW
         lr.positionCount = 0;
+
+        cooldownTimer = grappleCooldown;
+        grappleDinged = false;
+
+        audioSource.PlayOneShot(grappleOffSound, 0.3f);
     }
 
     void DrawRope()
@@ -138,7 +151,12 @@ public class GrappleBoost : MonoBehaviour
 
     void PlayGrappleReelSound()
     {
-        audioSource.clip = grappleSound;
-        audioSource.Play();
+        audioSource.PlayOneShot(grappleSound);
+    }
+
+    void PlayGrappleDingSound()
+    {
+        audioSource.PlayOneShot(grappleReadySound, 0.3f);
+        grappleDinged = true;
     }
 }

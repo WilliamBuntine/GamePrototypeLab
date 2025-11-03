@@ -47,20 +47,22 @@ public class PlayerMove : MonoBehaviour
     [Header("Sound Settings")]
     public AudioSource audioSource; // Audio source for playing sounds
     public AudioClip speedSound; // Sound to play when at high speed
+    public float baseInterval = 0.5f; // seconds between steps when walking
 
     public AudioClip Jumping; // Sound to play when jumping
 
     public AudioClip Walking; // Sound to play when walking
-    public float footstepInterval; // Interval between footstep sounds
-    public float footstepTimer = 0f; // Timer to track footstep intervals
-    private bool speedBreached;
+    private float footstepInterval; // Interval between footstep sounds
+    private float footstepTimer = 0f; // Timer to track footstep intervals
+    private float speedSoundCooldown = 0f; // timer to track cooldown
+    public float speedSoundInterval = 15f; // seconds between chances
 
 
     private Rigidbody rb;
     private CapsuleCollider capsule;
     private float xRotation = 0f;
     public bool grounded { get; private set; }
-    public bool walkingSoundPlaying = false;
+    private bool walkingSoundPlaying = false;
     private Vector3 inputDir;
 
     // store original collider + camera info
@@ -86,8 +88,10 @@ public class PlayerMove : MonoBehaviour
 
     void Update()
     {
-        float HorizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z).magnitude;
-        SetstepInverval(HorizontalVel);
+        if (speedSoundCooldown > 0f)
+        speedSoundCooldown -= Time.deltaTime;
+        
+        SetStepInterval();
 
         footstepTimer += Time.deltaTime;
         if(CheckWalkingandGrounded())
@@ -100,14 +104,9 @@ public class PlayerMove : MonoBehaviour
         Vector3 horizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
         float SpeedHoriz = horizontalVel.magnitude;
 
-        if (SpeedHoriz > 30f && !speedBreached)
+        if (SpeedHoriz > 30f && speedSoundCooldown <= 0f)
         {
-            SpeedSound();
-            speedBreached = true;
-        }
-        else
-        {
-            speedBreached = false;
+            TryPlaySpeedSound();
         }
 
 
@@ -220,19 +219,8 @@ public class PlayerMove : MonoBehaviour
             }
             else
             {
-                if (horizontalVel.magnitude < maxAirSpeed)
-                {
-                    Vector3 airForce = inputDir * targetSpeed * airControl;
-                    rb.AddForce(airForce, ForceMode.Acceleration);
-                }
-                else
-                {
-                    // limit air speed
-                    Vector3 horizontalDir = horizontalVel.normalized;
-                    Vector3 desiredVel = horizontalDir * maxAirSpeed;
-                    Vector3 forceDir = (desiredVel - new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z)) * 10f;
-                    rb.AddForce(forceDir, ForceMode.Force);
-                }
+                Vector3 airForce = inputDir * targetSpeed * airControl;
+                rb.AddForce(airForce, ForceMode.Acceleration);
             }
         }
         else if (grounded)
@@ -307,14 +295,16 @@ public class PlayerMove : MonoBehaviour
         grounded = Physics.Raycast(transform.position, Vector3.down, groundCheckDistance, groundMask);
     }
 
-    void SpeedSound()
+    void TryPlaySpeedSound()
     {
         audioSource.PlayOneShot(speedSound);
+        speedSoundCooldown = speedSoundInterval;
+        UnityEngine.Debug.Log("Speed sound played, cooldown started");
     }
 
     void JumpSound()
     {
-        audioSource.PlayOneShot(Jumping);
+        audioSource.PlayOneShot(Jumping, 0.25f);
     }
 
     void Walksound()
@@ -352,9 +342,15 @@ public class PlayerMove : MonoBehaviour
         return walkingSoundPlaying;
     }
     
-    void SetstepInverval(float interval)
+    void SetStepInterval()
     {
-        footstepInterval = interval / 20f;
+        float horizontalSpeed = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z).magnitude;
+
+
+        // Adjust interval based on speed (faster speed = smaller interval)
+        // Clamp to avoid going too crazy fast or too slow
+        footstepInterval = Mathf.Clamp(baseInterval / Mathf.Max(horizontalSpeed, 1f), 0.15f, baseInterval);
     }
+
 }
 
