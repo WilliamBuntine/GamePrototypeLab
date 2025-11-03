@@ -12,6 +12,8 @@ public class PlayerMove : MonoBehaviour
     public KeyCode resetKey = KeyCode.G;
 
     [Header("Movement Settings")]
+
+    float airbourneTimer = 0f;
     public bool grappling = false;
     public float walkSpeed = 7f;
     float currentSpeed;
@@ -49,6 +51,8 @@ public class PlayerMove : MonoBehaviour
     [Header("Sound Settings")]
     public AudioSource audioSource; // Audio source for playing sounds
     public AudioClip speedSound; // Sound to play when at high speed
+    public AudioClip Falling;
+
     public float baseInterval = 0.5f; // seconds between steps when walking
     float minInterval = 0.15f; // minimum interval between steps
 
@@ -91,9 +95,11 @@ public class PlayerMove : MonoBehaviour
 
     void Update()
     {
-        if (speedSoundCooldown > 0f)
         speedSoundCooldown -= Time.deltaTime;
         
+        
+
+
         SetStepInterval();
 
         footstepTimer += Time.deltaTime;
@@ -165,6 +171,19 @@ public class PlayerMove : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (!grounded)
+        {
+            airbourneTimer += Time.deltaTime;
+        }        
+        if(!grounded && airbourneTimer > 2f)
+        {
+            FallingSound();
+            if(grounded)
+            {
+                Landsound();
+            }
+        }
+
         if (isSliding)
         {
             slideFrictionMult += Time.fixedDeltaTime / slideDuration;
@@ -309,6 +328,12 @@ public class PlayerMove : MonoBehaviour
     {
         audioSource.PlayOneShot(Jumping, 0.25f);
     }
+    void Landsound()
+    {
+        audioSource.pitch = 1.5f;
+
+        audioSource.PlayOneShot(Jumping);
+    }
 
     void Walksound()
     {
@@ -344,7 +369,7 @@ public class PlayerMove : MonoBehaviour
 
         return walkingSoundPlaying;
     }
-    
+
     void SetStepInterval()
     {
         float horizontalSpeed = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z).magnitude;
@@ -352,7 +377,7 @@ public class PlayerMove : MonoBehaviour
 
         // Adjust interval based on speed (faster speed = smaller interval)
         // Clamp to avoid going too crazy fast or too slow
-        if(isSprinting)
+        if (isSprinting)
         {
             footstepInterval = baseInterval;
         }
@@ -360,6 +385,11 @@ public class PlayerMove : MonoBehaviour
         {
             footstepInterval = minInterval;
         }
+    }
+    
+    void FallingSound()
+    {
+        audioSource.PlayOneShot(Falling);
     }
 
 }

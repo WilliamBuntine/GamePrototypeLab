@@ -59,7 +59,7 @@ public class Course : MonoBehaviour
     void CompleteCourse()
     {
         courseComplete = true;
-        
+        Completesound();
         timer?.StopTimer();
         CourseStart.activeCourse = null;
         
