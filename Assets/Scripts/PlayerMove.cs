@@ -16,6 +16,8 @@ public class PlayerMove : MonoBehaviour
     public float walkSpeed = 7f;
     float currentSpeed;
     public float sprintSpeed = 12f;
+
+    bool isSprinting = false;
     public float jumpForce = 7f;
     public float groundFriction = 10f;
     public float airControl = 0.5f;
@@ -48,6 +50,7 @@ public class PlayerMove : MonoBehaviour
     public AudioSource audioSource; // Audio source for playing sounds
     public AudioClip speedSound; // Sound to play when at high speed
     public float baseInterval = 0.5f; // seconds between steps when walking
+    float minInterval = 0.15f; // minimum interval between steps
 
     public AudioClip Jumping; // Sound to play when jumping
 
@@ -115,7 +118,7 @@ public class PlayerMove : MonoBehaviour
         {
             StartSlide();
         }
-
+        if (Input.GetKey(KeyCode.LeftShift)) { isSprinting = true; }
         // end slide (timer or key up)
         if (isSliding)
         {
@@ -312,7 +315,7 @@ public class PlayerMove : MonoBehaviour
         if (footstepTimer >= footstepInterval)
         {
             audioSource.pitch = Random.Range(0.8f, 1.2f);
-            audioSource.PlayOneShot(Walking);
+            audioSource.PlayOneShot(Walking, 0.5f);
             UnityEngine.Debug.Log("Playing walking sound");
             footstepTimer = 0f;
 
@@ -349,7 +352,14 @@ public class PlayerMove : MonoBehaviour
 
         // Adjust interval based on speed (faster speed = smaller interval)
         // Clamp to avoid going too crazy fast or too slow
-        footstepInterval = Mathf.Clamp(baseInterval / Mathf.Max(horizontalSpeed, 1f), 0.15f, baseInterval);
+        if(isSprinting)
+        {
+            footstepInterval = baseInterval;
+        }
+        else if (!isSprinting)
+        {
+            footstepInterval = minInterval;
+        }
     }
 
 }

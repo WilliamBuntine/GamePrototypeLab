@@ -22,7 +22,7 @@ public class GrappleBoost : MonoBehaviour
     public float grappleAccelTimeCap = 1f;
 
     [Header("Cooldown")]
-    public float grappleCooldown = 0.1f;
+    public float grappleCooldown;
     private float cooldownTimer;
 
     private Vector3 grapplePoint;
@@ -156,7 +156,7 @@ public class GrappleBoost : MonoBehaviour
 
     void PlayGrappleDingSound()
     {
-        audioSource.PlayOneShot(grappleReadySound, 0.3f);
+        audioSource.PlayOneShot(grappleReadySound, 1.5f);
         grappleDinged = true;
     }
 }
