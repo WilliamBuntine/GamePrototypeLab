@@ -14,6 +14,7 @@ public class PlayerMove : MonoBehaviour
     [Header("Movement Settings")]
 
     float airbourneTimer = 0f;
+    bool airtime = false;
     public bool grappling = false;
     public float walkSpeed = 7f;
     float currentSpeed;
@@ -108,9 +109,12 @@ public class PlayerMove : MonoBehaviour
         if(!grounded && airbourneTimer > 2f && speedSoundCooldown <= 0f)
         {
             FallingSound();
-            if(grounded)
+            airtime = true;
+            if(grounded&&airtime)
             {
+
                 Landsound();
+                airtime = false;
             }
         }
 
@@ -336,7 +340,7 @@ public class PlayerMove : MonoBehaviour
     {
         audioSource.pitch = 1.5f;
 
-        audioSource.PlayOneShot(Jumping);
+        audioSource.PlayOneShot(Jumping, 1.5f);
         return;
     }
 
