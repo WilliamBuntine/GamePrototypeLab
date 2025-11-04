@@ -65,7 +65,7 @@ public class PlayerMove : MonoBehaviour
 
     public AudioSource loopSource;
     public AudioClip speedSound; // Sound to play when at high speed
-    public AudioClip Falling;
+    public AudioClip windClip;
 
     public float baseInterval = 0.5f; // seconds between steps when walking
     float minInterval = 0.15f; // minimum interval between steps
@@ -106,6 +106,7 @@ public class PlayerMove : MonoBehaviour
 
         Cursor.lockState = CursorLockMode.Locked;
 
+        loopSource.clip = windClip;
 
         UnityEngine.Debug.developerConsoleVisible = true;
 
@@ -115,24 +116,8 @@ public class PlayerMove : MonoBehaviour
     void Update()
     {
         speedSoundCooldown -= Time.deltaTime;
-            //Air sfx
-        if (grounded) { StopFallingSound(); airbourneTimer = 0f; }
-
-        if (!grounded)
-        {
-            airbourneTimer += Time.deltaTime;
-        }        
-        if(!grounded && airbourneTimer > 2f && speedSoundCooldown <= 0f)
-        {
-            FallingSound();
-            airtime = true;
-            if(grounded&&airtime)
-            {
-
-                Landsound();
-                airtime = false;
-            }
-        }
+        
+        WindSound();
 
         SetStepInterval();
         //Footsetp sfx
@@ -358,7 +343,7 @@ public class PlayerMove : MonoBehaviour
     {
         audioSource.PlayOneShot(Jumping, 0.15f);
     }
-    void Landsound()
+    void LandSound()
     {
         audioSource.pitch = 1.5f;
 
@@ -407,21 +392,22 @@ public class PlayerMove : MonoBehaviour
         footstepInterval = Mathf.Clamp(baseInterval / Mathf.Max(horizontalSpeed, 1f), minInterval, baseInterval);
     }
 
-    void FallingSound()
+    void WindSound()
     {
-        loopSource.clip = Falling;     // Set the clip on the AudioSource
-        loopSource.loop = true;        // Enable looping
-        loopSource.Play();             // Start playing        
-        speedSoundCooldown = speedSoundInterval;
-        return;
-    }
-    
-    void StopFallingSound()
-    {
-        loopSource.Stop();             // Stop playing        
-        loopSource.loop = false;       // Disable looping
-        loopSource.Play();
-        return;
-    }
+        float horizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z).magnitude;
 
+        if (horizontalVel > 30f)
+        {
+            if (!loopSource.isPlaying)
+                loopSource.Play();
+
+            loopSource.volume = Mathf.Lerp(0f, 0.8f, (horizontalVel - 30f) / 50f);
+            loopSource.pitch = Mathf.Lerp(1f, 1.5f, (horizontalVel - 30f) / 50f);
+        }
+        else
+        {
+            if (loopSource.isPlaying)
+                loopSource.Stop();
+        }
+    }
 }
