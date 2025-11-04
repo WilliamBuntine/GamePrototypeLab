@@ -14,6 +14,8 @@ public class Scoreboard : MonoBehaviour
 {
     private string filePath;
     public ScoreData data = new ScoreData();
+    public AudioSource audioSource;
+    public AudioClip CourseComplete;
     private TMP_Text scoreboardText;
 
     void Awake()
@@ -31,11 +33,13 @@ public class Scoreboard : MonoBehaviour
         if (entry != null)
         {
             if (newTime < entry.bestTime)
+                CompleteSound();
                 entry.bestTime = newTime;
         }
         else
         {
             data.entries.Add(new ScoreEntry { courseName = courseName, bestTime = newTime });
+            CompleteSound();
         }
 
         SaveScores();
@@ -74,5 +78,10 @@ public class Scoreboard : MonoBehaviour
         }
 
         scoreboardText.text = sb.ToString();
+    }
+
+    void CompleteSound()
+    {
+        audioSource.PlayOneShot(CourseComplete, 0.5f);
     }
 }
