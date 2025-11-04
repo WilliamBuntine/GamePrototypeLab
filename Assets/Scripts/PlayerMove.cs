@@ -23,6 +23,7 @@ public class PlayerMove : MonoBehaviour
     [Header("Movement Settings")]
 
     float airbourneTimer = 0f;
+    bool airtime = false;
     public bool grappling = false;
     public float walkSpeed = 7f;
     float currentSpeed;
@@ -61,6 +62,8 @@ public class PlayerMove : MonoBehaviour
 
     [Header("Sound Settings")]
     public AudioSource audioSource; // Audio source for playing sounds
+
+    public AudioSource loopSource;
     public AudioClip speedSound; // Sound to play when at high speed
     public AudioClip Falling;
 
@@ -112,12 +115,27 @@ public class PlayerMove : MonoBehaviour
     void Update()
     {
         speedSoundCooldown -= Time.deltaTime;
-        
-        
+            //Air sfx
+        if (grounded) { StopFallingSound(); airbourneTimer = 0f; }
 
+        if (!grounded)
+        {
+            airbourneTimer += Time.deltaTime;
+        }        
+        if(!grounded && airbourneTimer > 2f && speedSoundCooldown <= 0f)
+        {
+            FallingSound();
+            airtime = true;
+            if(grounded&&airtime)
+            {
+
+                Landsound();
+                airtime = false;
+            }
+        }
 
         SetStepInterval();
-
+        //Footsetp sfx
         footstepTimer += Time.deltaTime;
         if(CheckWalkingandGrounded())
         {
@@ -194,18 +212,7 @@ public class PlayerMove : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (!grounded)
-        {
-            airbourneTimer += Time.deltaTime;
-        }        
-        // if(!grounded && airbourneTimer > 2f)
-        // {
-        //     FallingSound();
-        //     if(grounded)
-        //     {
-        //         Landsound();
-        //     }
-        // }
+        
 
         if (isSliding)
         {
@@ -355,7 +362,8 @@ public class PlayerMove : MonoBehaviour
     {
         audioSource.pitch = 1.5f;
 
-        audioSource.PlayOneShot(Jumping);
+        audioSource.PlayOneShot(Jumping, 1.5f);
+        return;
     }
 
     void Walksound()
@@ -398,10 +406,22 @@ public class PlayerMove : MonoBehaviour
         float horizontalSpeed = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z).magnitude;
         footstepInterval = Mathf.Clamp(baseInterval / Mathf.Max(horizontalSpeed, 1f), minInterval, baseInterval);
     }
-    
+
     void FallingSound()
     {
-        audioSource.PlayOneShot(Falling);
+        loopSource.clip = Falling;     // Set the clip on the AudioSource
+        loopSource.loop = true;        // Enable looping
+        loopSource.Play();             // Start playing        
+        speedSoundCooldown = speedSoundInterval;
+        return;
+    }
+    
+    void StopFallingSound()
+    {
+        loopSource.Stop();             // Stop playing        
+        loopSource.loop = false;       // Disable looping
+        loopSource.Play();
+        return;
     }
 
 }
