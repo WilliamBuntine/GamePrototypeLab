@@ -4,9 +4,6 @@ using TMPro;
 
 public class Course : MonoBehaviour
 {
-    public AudioSource audioSource; // Audio source for playing sounds
-    public AudioClip CourseComplete; // Sound to play when at high speed
-
     public string courseName;
     public Checkpoint[] pointList;
     public CourseUI ui;
@@ -59,7 +56,6 @@ public class Course : MonoBehaviour
     void CompleteCourse()
     {
         courseComplete = true;
-        Completesound();
         timer?.StopTimer();
         CourseStart.activeCourse = null;
         
@@ -118,8 +114,5 @@ public class Course : MonoBehaviour
         Debug.Log($"Course '{courseName}' Cancelled!");
     }
     
-    void Completesound()
-    {
-        audioSource.PlayOneShot(CourseComplete, 1.0f);
-    }
+    
 }

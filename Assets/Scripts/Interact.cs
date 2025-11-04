@@ -18,6 +18,10 @@ public class Interact : MonoBehaviour
     {
         if (Input.GetKeyDown(interactKey))
         {
+            Cursor.lockState = Cursor.lockState == CursorLockMode.Locked 
+            ? CursorLockMode.None 
+            : CursorLockMode.Locked;
+
             TryInteract();
         }
     }

@@ -11,6 +11,15 @@ public class PlayerMove : MonoBehaviour
     public Course activeCourse;
     public KeyCode resetKey = KeyCode.G;
 
+    [Header("Control Bools")]
+    public bool walkingEnabled = true;
+    public bool sprintingEnabled = true;
+    public bool jumpingEnabled = true;
+    public bool slidingEnabled = true;
+    public bool mouseMoveEnabled = true;
+    public bool mouseLeftEnabled = true;
+    public bool mouseRightEnabled = true;
+
     [Header("Movement Settings")]
 
     float airbourneTimer = 0f;
@@ -26,6 +35,8 @@ public class PlayerMove : MonoBehaviour
     public float maxAirSpeed;
     public float groundCheckDistance = 0.5f;
     public LayerMask groundMask;
+    private float moveX;
+    private float moveZ;
 
     [Header("Slide Settings")]
     public float slideFrictionMult = 1f;
@@ -91,6 +102,11 @@ public class PlayerMove : MonoBehaviour
         originalCameraLocalPos = playerCamera.localPosition;
 
         Cursor.lockState = CursorLockMode.Locked;
+
+
+        UnityEngine.Debug.developerConsoleVisible = true;
+
+
     }
 
     void Update()
@@ -107,7 +123,10 @@ public class PlayerMove : MonoBehaviour
         {
             Walksound();
         }
-        HandleLook();
+
+        if(mouseMoveEnabled) {HandleLook();}
+
+
         GroundCheck();
 
         Vector3 horizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
@@ -120,11 +139,12 @@ public class PlayerMove : MonoBehaviour
 
 
         // start slide
-        if ((Input.GetKeyDown(slideKey)))
+        if (Input.GetKeyDown(slideKey) && slidingEnabled)
         {
             StartSlide();
         }
-        if (Input.GetKey(KeyCode.LeftShift)) { isSprinting = true; }
+
+        if (Input.GetKey(KeyCode.LeftShift) && sprintingEnabled) { isSprinting = true; }
         // end slide (timer or key up)
         if (isSliding)
         {
@@ -135,14 +155,17 @@ public class PlayerMove : MonoBehaviour
         }
 
         // Collect input here (for FixedUpdate use)
-        float moveX = Input.GetAxisRaw("Horizontal");
-        float moveZ = Input.GetAxisRaw("Vertical");
+        if (walkingEnabled)
+        {
+        moveX = Input.GetAxisRaw("Horizontal");
+        moveZ = Input.GetAxisRaw("Vertical");
+        }
         
         inputDir = (transform.right * moveX + transform.forward * moveZ).normalized;
         currentSpeed = walkSpeed;
        
 
-        if (Input.GetButtonDown("Jump"))
+        if (Input.GetButtonDown("Jump") && jumpingEnabled)
         {
             if (grounded)
             {
@@ -154,7 +177,7 @@ public class PlayerMove : MonoBehaviour
             }
         }
 
-        if (Input.GetKeyDown(resetKey))
+        if (Input.GetKeyDown(resetKey) && activeCourse != null)
         {
             activeCourse.CancelCourse();
 
@@ -175,14 +198,14 @@ public class PlayerMove : MonoBehaviour
         {
             airbourneTimer += Time.deltaTime;
         }        
-        if(!grounded && airbourneTimer > 2f)
-        {
-            FallingSound();
-            if(grounded)
-            {
-                Landsound();
-            }
-        }
+        // if(!grounded && airbourneTimer > 2f)
+        // {
+        //     FallingSound();
+        //     if(grounded)
+        //     {
+        //         Landsound();
+        //     }
+        // }
 
         if (isSliding)
         {
@@ -212,7 +235,7 @@ public class PlayerMove : MonoBehaviour
 
     void HandleMovement()
     {
-        float targetSpeed = Input.GetKey(KeyCode.LeftShift) ? sprintSpeed : currentSpeed;
+        float targetSpeed = Input.GetKey(KeyCode.LeftShift) && sprintingEnabled ? sprintSpeed : currentSpeed;
         Vector3 horizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
 
         if (isSliding)
@@ -326,7 +349,7 @@ public class PlayerMove : MonoBehaviour
 
     void JumpSound()
     {
-        audioSource.PlayOneShot(Jumping, 0.25f);
+        audioSource.PlayOneShot(Jumping, 0.15f);
     }
     void Landsound()
     {
@@ -340,7 +363,7 @@ public class PlayerMove : MonoBehaviour
         if (footstepTimer >= footstepInterval)
         {
             audioSource.pitch = Random.Range(0.8f, 1.2f);
-            audioSource.PlayOneShot(Walking, 0.5f);
+            audioSource.PlayOneShot(Walking, 0.3f);
             UnityEngine.Debug.Log("Playing walking sound");
             footstepTimer = 0f;
 
@@ -373,18 +396,7 @@ public class PlayerMove : MonoBehaviour
     void SetStepInterval()
     {
         float horizontalSpeed = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z).magnitude;
-
-
-        // Adjust interval based on speed (faster speed = smaller interval)
-        // Clamp to avoid going too crazy fast or too slow
-        if (isSprinting)
-        {
-            footstepInterval = baseInterval;
-        }
-        else if (!isSprinting)
-        {
-            footstepInterval = minInterval;
-        }
+        footstepInterval = Mathf.Clamp(baseInterval / Mathf.Max(horizontalSpeed, 1f), minInterval, baseInterval);
     }
     
     void FallingSound()
@@ -393,4 +405,3 @@ public class PlayerMove : MonoBehaviour
     }
 
 }
-

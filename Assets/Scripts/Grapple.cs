@@ -156,7 +156,7 @@ public class GrappleBoost : MonoBehaviour
 
     void PlayGrappleDingSound()
     {
-        audioSource.PlayOneShot(grappleReadySound, 1.5f);
+        audioSource.PlayOneShot(grappleReadySound, 0.2f);
         grappleDinged = true;
     }
 }
