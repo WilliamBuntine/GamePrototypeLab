@@ -92,6 +92,9 @@ public class PlayerMove : MonoBehaviour
     private Vector3 originalCameraLocalPos;
     private Swinging swinging;
 
+    private Vector3 storedVelocity;
+    private Vector3 storedAngularVelocity;
+    private bool isFrozen = false;
 
 
     void Start()
@@ -107,10 +110,6 @@ public class PlayerMove : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
 
         loopSource.clip = windClip;
-
-        UnityEngine.Debug.developerConsoleVisible = true;
-
-
     }
 
     void Update()
@@ -409,5 +408,47 @@ public class PlayerMove : MonoBehaviour
             if (loopSource.isPlaying)
                 loopSource.Stop();
         }
+    }
+
+    public void FreezePlayer()
+    {
+        if (isFrozen) return;
+
+        // Store motion
+        storedVelocity = rb.linearVelocity;
+        storedAngularVelocity = rb.angularVelocity;
+
+        // Freeze physics
+        rb.isKinematic = true;
+
+        // Disable movement + input
+        // walkingEnabled = false;
+        // sprintingEnabled = false;
+        // jumpingEnabled = false;
+        // slidingEnabled = false;
+        // mouseMoveEnabled = false;
+
+        isFrozen = true;
+    }
+
+    public void UnfreezePlayer()
+    {
+        if (!isFrozen) return;
+
+        // Unfreeze physics
+        rb.isKinematic = false;
+
+        // Restore motion
+        rb.linearVelocity = storedVelocity;
+        rb.angularVelocity = storedAngularVelocity;
+
+        // Re-enable movement + input
+        // walkingEnabled = true;
+        // sprintingEnabled = true;
+        // jumpingEnabled = true;
+        // slidingEnabled = true;
+        // mouseMoveEnabled = true;
+
+        isFrozen = false;
     }
 }

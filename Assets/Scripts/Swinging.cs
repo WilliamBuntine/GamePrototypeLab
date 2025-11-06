@@ -5,6 +5,7 @@ public class Swinging : MonoBehaviour
 {
     private PlayerMove playermove;
     private Rigidbody rb;
+    public bool mouseLeftEnabled = true;
 
     [Header("Input")]
     public KeyCode swingKey = KeyCode.Mouse0;
@@ -50,7 +51,7 @@ public class Swinging : MonoBehaviour
     bool wHeld, aHeld, sHeld, dHeld, spaceheld;
     void Update()
     {
-        if (Input.GetKeyDown(swingKey))
+        if (Input.GetKeyDown(swingKey) && mouseLeftEnabled)
         {
             StartSwing();
             playerController.grappling = true;
@@ -115,7 +116,7 @@ public class Swinging : MonoBehaviour
         }
     }
 
-    void StartSwing()
+    public void StartSwing()
     {
         RaycastHit hit;
         if (Physics.Raycast(cam.position, cam.forward, out hit, maxSwingDistance, Grappleable))

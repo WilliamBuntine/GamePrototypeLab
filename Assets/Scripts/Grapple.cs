@@ -5,6 +5,8 @@ using UnityEngine;
 public class GrappleBoost : MonoBehaviour
 {
     private Rigidbody rb;
+    public bool mouseRightEnabled = true;
+    public bool iHasControl = true;
 
     [Header("Input")]
     public KeyCode grappleKey = KeyCode.Mouse1;
@@ -55,12 +57,12 @@ public class GrappleBoost : MonoBehaviour
             PlayGrappleDingSound();
         }
 
-        if (Input.GetKeyDown(grappleKey) && cooldownTimer <= 0f)
+        if (Input.GetKeyDown(grappleKey) && cooldownTimer <= 0f && mouseRightEnabled)
         {
             TryStartGrapple();
         }
 
-        if (Input.GetKeyUp(grappleKey) && isGrappling)
+        if (Input.GetKeyUp(grappleKey) && isGrappling && iHasControl)
         {
             StopGrapple();
         }
@@ -107,7 +109,7 @@ public class GrappleBoost : MonoBehaviour
           }
         }
 
-    void TryStartGrapple()
+    public void TryStartGrapple()
     {
         RaycastHit hit;
         if (Physics.Raycast(cam.position, cam.forward, out hit, maxGrappleDistance, grappleable))
@@ -127,7 +129,7 @@ public class GrappleBoost : MonoBehaviour
         }
     }
 
-    void StopGrapple()
+    public void StopGrapple()
     {
         isGrappling = false;
         connectedBody = null; // NEW
