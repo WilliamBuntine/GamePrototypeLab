@@ -55,6 +55,8 @@ public class PlayerIntroduction : MonoBehaviour
 
     IEnumerator WaitForJump()
     {
+        //Print message here telling player to hit Space bar to jump
+
         yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.Space));
 
         yield return new WaitForSeconds(jumpWait);
@@ -68,7 +70,7 @@ public class PlayerIntroduction : MonoBehaviour
     IEnumerator WaitForGrapple()
     {
 
-        //Print message here telling player to hit Right mouse button
+        //Print message here telling player to hit Right mouse button to reel in
 
         yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.Mouse1));
 
@@ -94,7 +96,7 @@ public class PlayerIntroduction : MonoBehaviour
     {
         playerGrapple.iHasControl = true;
 
-        //Print message here telling player to release Right mouse button
+        //Print message here telling player to release Right mouse button to stop reeling in
 
         yield return new WaitUntil(() => Input.GetKeyUp(KeyCode.Mouse1));
 
@@ -116,7 +118,7 @@ public class PlayerIntroduction : MonoBehaviour
 
     IEnumerator WaitForSwing()
     {
-        //Print message here telling player to hit Left mouse button
+        //Print message here telling player to hit Left mouse button to start swinging
 
         yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.Mouse0));
 
@@ -128,9 +130,15 @@ public class PlayerIntroduction : MonoBehaviour
         
         yield return new WaitForSeconds(grappleReleaseWait);
 
-        //Print message here explaining slide and wall jump, release mouse to finish!
+        player.FreezePlayer();
+
+
+        //Print message here explaining slide and wall jump, release mouse to finish swing
 
         yield return new WaitUntil(() => Input.GetKeyUp(KeyCode.Mouse0));
+
+        player.UnfreezePlayer();
+
 
 
         player.walkingEnabled = true;

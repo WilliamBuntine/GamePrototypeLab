@@ -33,8 +33,10 @@ public class Scoreboard : MonoBehaviour
         if (entry != null)
         {
             if (newTime < entry.bestTime)
+            {
                 CompleteSound();
                 entry.bestTime = newTime;
+            }
         }
         else
         {
