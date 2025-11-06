@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using TMPro;
 
 public class PlayerIntroduction : MonoBehaviour
 {
@@ -14,12 +14,29 @@ public class PlayerIntroduction : MonoBehaviour
     public Grayscale grayscale;
     private Transform targetLookPoint;
 
+    public GameObject[] prompts;
+
+
 
     public float jumpWait = 0.9f;
     public float grappleWait = 0.7f;
     public float grappleReleaseWait = 1f;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
+
+
+    private TMP_Text[] promptTexts;
+
+    void Awake()
+    {
+        promptTexts = new TMP_Text[prompts.Length];
+        for (int i = 0; i < prompts.Length; i++)
+        {
+            if (prompts[i] != null)
+                promptTexts[i] = prompts[i].GetComponent<TMP_Text>();
+        }
+    }
+
     public void BeginIntro()
     {
         LookatPoint(lookPoint1);
@@ -61,8 +78,15 @@ public class PlayerIntroduction : MonoBehaviour
 
         grayscale.EnableGrayscale(true);
         //Print message here telling player to hit Space bar to jump
+        promptTexts[0].alpha = 1;
+
 
         yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.Space));
+
+        promptTexts[0].alpha = 0;
+
+
+
 
         grayscale.EnableGrayscale(false);
 
@@ -79,10 +103,17 @@ public class PlayerIntroduction : MonoBehaviour
     {
         grayscale.EnableGrayscale(true);
 
+        promptTexts[1].alpha = 1;
 
         //Print message here telling player to hit Right mouse button to reel in
 
         yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.Mouse1));
+
+        promptTexts[1].alpha = 0;
+
+
+
+
 
         player.UnfreezePlayer();
 
@@ -111,10 +142,16 @@ public class PlayerIntroduction : MonoBehaviour
 
         grayscale.EnableGrayscale(true);
 
+        promptTexts[2].alpha = 1;
 
         //Print message here telling player to release Right mouse button to stop reeling in
 
         yield return new WaitUntil(() => Input.GetKeyUp(KeyCode.Mouse1));
+
+        promptTexts[2].alpha = 0;
+
+
+
 
         grayscale.EnableGrayscale(false);
 
@@ -141,9 +178,16 @@ public class PlayerIntroduction : MonoBehaviour
 
         grayscale.EnableGrayscale(true);
 
+        promptTexts[3].alpha = 1;
+
         //Print message here telling player to hit Left mouse button to start swinging
 
         yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.Mouse0));
+
+        promptTexts[3].alpha = 0;
+
+
+
 
         grayscale.EnableGrayscale(false);
 
@@ -160,9 +204,27 @@ public class PlayerIntroduction : MonoBehaviour
 
         grayscale.EnableGrayscale(true);
 
+        promptTexts[4].alpha = 1;
+        promptTexts[5].alpha = 1;
+        promptTexts[6].alpha = 1;
+        promptTexts[7].alpha = 1;
+
+
         //Print message here explaining slide and wall jump, release mouse to finish swing
 
         yield return new WaitUntil(() => Input.GetKeyUp(KeyCode.Mouse0));
+
+        yield return new WaitForSeconds(4);
+
+
+        promptTexts[4].alpha = 0;
+        promptTexts[5].alpha = 0;
+        promptTexts[6].alpha = 0;
+        promptTexts[7].alpha = 0;
+
+
+
+
 
         grayscale.EnableGrayscale(false);
 
