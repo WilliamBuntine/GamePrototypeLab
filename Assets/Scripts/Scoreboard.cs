@@ -26,6 +26,14 @@ public class Scoreboard : MonoBehaviour
         UpdateDisplay();
     }
 
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.M))
+        {
+            CompleteSound();
+        }
+    }
+
     public void UpdateScore(string courseName, float newTime)
     {
         var entry = data.entries.Find(e => e.courseName == courseName);
