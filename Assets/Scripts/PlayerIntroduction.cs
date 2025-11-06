@@ -11,6 +11,7 @@ public class PlayerIntroduction : MonoBehaviour
     public Camera playerCam;
     public Transform lookPoint1;
     public Transform lookPoint2;
+    public Grayscale grayscale;
     private Transform targetLookPoint;
 
 
@@ -19,7 +20,7 @@ public class PlayerIntroduction : MonoBehaviour
     public float grappleReleaseWait = 1f;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public void BeginIntro()
     {
         LookatPoint(lookPoint1);
         StartCoroutine(WaitForJump());
@@ -55,9 +56,16 @@ public class PlayerIntroduction : MonoBehaviour
 
     IEnumerator WaitForJump()
     {
+        player.UnfreezePlayer();
+
+
+        grayscale.EnableGrayscale(true);
         //Print message here telling player to hit Space bar to jump
 
         yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.Space));
+
+        grayscale.EnableGrayscale(false);
+
 
         yield return new WaitForSeconds(jumpWait);
 
@@ -69,6 +77,8 @@ public class PlayerIntroduction : MonoBehaviour
 
     IEnumerator WaitForGrapple()
     {
+        grayscale.EnableGrayscale(true);
+
 
         //Print message here telling player to hit Right mouse button to reel in
 
@@ -81,6 +91,9 @@ public class PlayerIntroduction : MonoBehaviour
         playerGrapple.iHasControl = false;
 
         targetLookPoint = null;
+
+        grayscale.EnableGrayscale(false);
+
         
         yield return new WaitForSeconds(grappleWait);
 
@@ -96,9 +109,15 @@ public class PlayerIntroduction : MonoBehaviour
     {
         playerGrapple.iHasControl = true;
 
+        grayscale.EnableGrayscale(true);
+
+
         //Print message here telling player to release Right mouse button to stop reeling in
 
         yield return new WaitUntil(() => Input.GetKeyUp(KeyCode.Mouse1));
+
+        grayscale.EnableGrayscale(false);
+
 
         player.UnfreezePlayer();
 
@@ -106,9 +125,10 @@ public class PlayerIntroduction : MonoBehaviour
 
         targetLookPoint = lookPoint2;
         LookatPoint(lookPoint2);
-
         
         yield return new WaitForSeconds(grappleReleaseWait);
+
+
 
         player.FreezePlayer();
 
@@ -118,9 +138,15 @@ public class PlayerIntroduction : MonoBehaviour
 
     IEnumerator WaitForSwing()
     {
+
+        grayscale.EnableGrayscale(true);
+
         //Print message here telling player to hit Left mouse button to start swinging
 
         yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.Mouse0));
+
+        grayscale.EnableGrayscale(false);
+
 
         player.UnfreezePlayer();
 
@@ -132,10 +158,14 @@ public class PlayerIntroduction : MonoBehaviour
 
         player.FreezePlayer();
 
+        grayscale.EnableGrayscale(true);
 
         //Print message here explaining slide and wall jump, release mouse to finish swing
 
         yield return new WaitUntil(() => Input.GetKeyUp(KeyCode.Mouse0));
+
+        grayscale.EnableGrayscale(false);
+
 
         player.UnfreezePlayer();
 

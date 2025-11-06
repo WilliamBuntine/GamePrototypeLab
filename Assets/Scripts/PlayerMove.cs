@@ -96,18 +96,18 @@ public class PlayerMove : MonoBehaviour
     private Vector3 storedAngularVelocity;
     private bool isFrozen = false;
 
-
-    void Start()
+    void Awake()
     {
         rb = GetComponent<Rigidbody>();
+    }
+    void Start()
+    {
         capsule = GetComponent<CapsuleCollider>();
         rb.freezeRotation = true;
 
         originalColliderHeight = capsule.height;
         originalColliderCenter = capsule.center;
         originalCameraLocalPos = playerCamera.localPosition;
-
-        Cursor.lockState = CursorLockMode.Locked;
 
         loopSource.clip = windClip;
     }
