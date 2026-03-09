@@ -46,6 +46,14 @@ public class Swinging : MonoBehaviour
         rb = GetComponent<Rigidbody>();
     }
 
+    float GetTangentialSpeed()
+    {
+        Vector3 ropeDir = GetRopeDir();
+        Vector3 v = rb.linearVelocity; // if on Unity 2022/2023 use rb.velocity instead
+        Vector3 tangential = Vector3.ProjectOnPlane(v, ropeDir);
+        return tangential.magnitude;
+    }
+
     // Update is called once per frame
 
     bool wHeld, aHeld, sHeld, dHeld, spaceheld;
@@ -191,24 +199,55 @@ public class Swinging : MonoBehaviour
         isSwinging = true;
     }
 
+    Vector3 GetRopeDir()
+    {
+        // From player to grapple point
+        return (swingPoint - player.position).normalized;
+    }
+
+    Vector3 GetSideDir(bool right)
+    {
+        Vector3 ropeDir = GetRopeDir();
+
+        // Use camera's right as your intended control direction,
+        // BUT remove any component along the rope so it's purely tangential.
+        Vector3 intended = right ? cam.right : -cam.right;
+
+        Vector3 sideDir = Vector3.ProjectOnPlane(intended, ropeDir);
+
+        // Safety: if ropeDir is almost parallel to intended, sideDir can be near zero.
+        if (sideDir.sqrMagnitude < 0.0001f)
+            return Vector3.zero;
+
+        return sideDir.normalized;
+    }
+
     void ReelLeft()
     {
-        rb.AddForce(-player.right * sideThrust, ForceMode.Acceleration);
+        Vector3 dir = GetSideDir(right: false);
+        if (dir != Vector3.zero)
+            rb.AddForce(dir * sideThrust, ForceMode.Acceleration);
     }
 
     void ReelLeftSpeed()
     {
-        rb.AddForce(-player.right * (0.3f * sideThrust), ForceMode.Acceleration);
+        Vector3 dir = GetSideDir(right: false);
+        if (dir != Vector3.zero)
+            rb.AddForce(dir * (0.3f * sideThrust), ForceMode.Acceleration);
     }
 
     void ReelRight()
     {
-        rb.AddForce(player.right * sideThrust, ForceMode.Acceleration);
+        Vector3 dir = GetSideDir(right: true);
+        if (dir != Vector3.zero)
+            rb.AddForce(dir * sideThrust, ForceMode.Acceleration);
     }
 
     void ReelRightSpeed()
     {
-        rb.AddForce(player.right * (0.3f * sideThrust), ForceMode.Acceleration);
+        Vector3 dir = GetSideDir(right: true);
+        if (dir != Vector3.zero)
+            rb.AddForce(dir * (0.3f * sideThrust), ForceMode.Acceleration);
     }
     
      void GrappleReel()
